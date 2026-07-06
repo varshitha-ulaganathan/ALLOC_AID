@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Road Infrastructure Impact Simulator</title>
+    <meta name="description"
+        content="Simulate and evaluate road infrastructure impact using AI-powered analytics for Tamil Nadu constituencies.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e6e8ea;
+            --panel-bg: rgba(13, 20, 35, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.06);
+            --text-main: #3e419c;
+            --text-muted: #9ca3af;
+            --neon-purple: #a855f7;
+            --neon-purple-glow: rgba(168, 85, 247, 0.35);
+            --neon-cyan: #06b6d4;
+            --neon-cyan-glow: rgba(6, 182, 212, 0.35);
+            --neon-emerald: #10b981;
+            --neon-emerald-glow: rgba(16, 185, 129, 0.35);
+            --neon-amber: #f59e0b;
+            --neon-amber-glow: rgba(245, 158, 11, 0.35);
+            --neon-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+            background: rgba(8, 12, 20, 0.6);
+            border-bottom: 1px solid var(--panel-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-symbol {
+            background: linear-gradient(135deg, var(--neon-amber), var(--neon-cyan));
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav-back:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+        }
+
+        .glass-panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            border-left: 3px solid var(--neon-amber);
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-input option,
+        .form-input optgroup {
+            color: #111827;
+            background-color: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-amber);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--neon-amber);
+        }
+
+        .slider-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .form-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px var(--neon-amber);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--neon-amber);
+        }
+
+        .segmented-control {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .segment-btn {
+            position: relative;
+        }
+
+        .segment-btn input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .segment-label {
+            display: block;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.3s;
+        }
+
+        .segment-btn input:checked+.segment-label {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #ffffff;
+            text-shadow: 0 0 5px var(--neon-amber-glow);
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, var(--neon-amber), var(--neon-cyan));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.5);
+            background: linear-gradient(135deg, #fbbf24, #22d3ee);
+        }
+
+        .btn-run:active {
+            transform: translateY(0);
+        }
+
+        .right-panel-wrapper {
+            position: relative;
+            min-height: 500px;
+        }
+
+        .idle-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            height: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            background: rgba(13, 20, 35, 0.3);
+        }
+
+        .idle-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.3));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .idle-placeholder h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .idle-placeholder p {
+            color: var(--text-muted);
+            max-width: 400px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: rgba(8, 12, 20, 0.92);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.08);
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 2rem;
+        }
+
+        .spinner-outer {
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: var(--neon-amber);
+            border-bottom-color: var(--neon-cyan);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-inner {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 70px;
+            height: 70px;
+            border: 3px solid transparent;
+            border-left-color: var(--neon-emerald);
+            border-right-color: var(--neon-purple);
+            border-radius: 50%;
+            animation: spin-reverse 2s linear infinite;
+        }
+
+        .spinner-core {
+            position: absolute;
+            top: 35px;
+            left: 35px;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ffffff;
+            animation: pulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            to {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .loading-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .loading-logs {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--neon-amber);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            max-width: 480px;
+            height: 120px;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-shadow: 0 0 4px rgba(245, 158, 11, 0.3);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(5px);
+            animation: slide-up-log 0.2s forwards;
+        }
+
+        @keyframes slide-up-log {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-results {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fade-in 0.5s ease-out forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-result-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08);
+        }
+
+        @media (max-width: 600px) {
+            .hero-result-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .score-circle-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-bg-circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.06);
+            stroke-width: 8;
+        }
+
+        .score-progress-circle {
+            fill: none;
+            stroke: url(#scoreGradientRoad);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-text-val {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .score-text-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        .hero-details {
+            flex-grow: 1;
+        }
+
+        .rec-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-badge.high {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--neon-emerald);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .rec-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--neon-amber);
+        }
+
+        .rec-badge.low {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--neon-red);
+        }
+
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .stats-grid-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card-micro {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-card-micro .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-card-micro .value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-card-micro .subtext {
+            font-size: 0.75rem;
+            color: var(--neon-amber);
+            font-weight: 500;
+        }
+
+        .dash-grid-main {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 800px) {
+            .dash-grid-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .metric-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-row-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .metric-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .metric-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .metric-val-pill {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-val-pill.emerald {
+            color: var(--neon-emerald);
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .metric-val-pill.cyan {
+            color: var(--neon-cyan);
+            background: rgba(6, 182, 212, 0.06);
+            border-color: rgba(6, 182, 212, 0.15);
+        }
+
+        .metric-val-pill.amber {
+            color: var(--neon-amber);
+            background: rgba(245, 158, 11, 0.06);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .metric-val-pill.red {
+            color: var(--neon-red);
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+
+        .chart-box-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-desc-micro {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -4px;
+        }
+
+        .svg-chart-container {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .radar-grid-line {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1;
+        }
+
+        .radar-axis {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 1;
+            stroke-dasharray: 2, 2;
+        }
+
+        .radar-polygon-filled {
+            fill: rgba(245, 158, 11, 0.2);
+            stroke: var(--neon-amber);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px var(--neon-amber-glow));
+            transition: all 1s ease-in-out;
+        }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-size: 8px;
+            font-weight: 600;
+            text-anchor: middle;
+        }
+
+        .bar-bg {
+            fill: rgba(255, 255, 255, 0.03);
+            rx: 6;
+        }
+
+        .bar-active-1 {
+            fill: url(#amberGradient);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .bar-active-2 {
+            fill: url(#cyanGradientRoad);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .reasoning-panel {
+            background: rgba(245, 158, 11, 0.03);
+            border: 1px dashed rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reasoning-title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neon-amber);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .reasoning-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .reasoning-text strong {
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        .footer-logo {
+            text-align: center;
+            padding: 1.5rem 0 0.5rem 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="homepage1.html" class="logo">
+            <div class="logo-symbol">🛣️</div>
+            <span>RoadSim AI</span>
+        </a>
+        <a href="homepage1.html" class="nav-back">
+            <span>←</span> Back to MainBoard
+        </a>
+    </header>
+
+    <div class="app-container">
+
+        <!-- Left Column: Simulation Form -->
+        <div class="glass-panel">
+            <h2 class="glass-panel-title">
+                <span>Simulation Parameters</span>
+                <span
+                    style="font-size: 0.8rem; color: var(--neon-amber); font-weight: normal; font-family: monospace;">MODEL
+                    v2.1</span>
+            </h2>
+
+            <div class="form-group">
+                <label class="form-label">Road Project Name</label>
+                <input type="text" id="road-name" class="form-input" value="Madurai East Bypass Corridor">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">District</label>
+                    <select id="district-select" class="form-input" onchange="updateConstituencies()">
+                        <option value="Madurai">Madurai</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Coimbatore">Coimbatore</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Constituency</label>
+                    <select id="constituency-select" class="form-input"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Route / Landmark</label>
+                <input type="text" id="location-name" class="form-input" value="Othakadai to Madurai Ring Road">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Road Category</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="cat-village" name="road-category" value="Village Road"
+                            onchange="handleCategoryChange()">
+                        <label for="cat-village" class="segment-label">Village</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="cat-district" name="road-category" value="District Road" checked
+                            onchange="handleCategoryChange()">
+                        <label for="cat-district" class="segment-label">District</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="cat-state" name="road-category" value="State Highway"
+                            onchange="handleCategoryChange()">
+                        <label for="cat-state" class="segment-label">State Hwy</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Surface Type</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="type-bitumen" name="road-type" value="Bitumen" checked
+                            onchange="handleTypeChange()">
+                        <label for="type-bitumen" class="segment-label">Bitumen</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-concrete" name="road-type" value="Concrete"
+                            onchange="handleTypeChange()">
+                        <label for="type-concrete" class="segment-label">Concrete</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-4lane" name="road-type" value="4-Lane NH"
+                            onchange="handleTypeChange()">
+                        <label for="type-4lane" class="segment-label">4-Lane NH</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Road Length</label>
+                    <span id="length-val" class="slider-value">18 km</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="length-slider" class="form-slider" min="1" max="150" value="18"
+                        oninput="handleLengthSlider(this.value)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Project Budget</label>
+                    <span id="budget-val" class="slider-value">&#x20B9;24 Crore</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="budget-slider" class="form-slider" min="1" max="500" value="24"
+                        oninput="handleBudgetSlider(this.value)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Daily Traffic Volume</label>
+                    <span id="traffic-vol-val" class="slider-value">8,000 vehicles/day</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="traffic-slider" class="form-slider" min="500" max="100000" step="500"
+                        value="8000" oninput="handleTrafficSlider(this.value)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Population Served</label>
+                    <span id="pop-val" class="slider-value">20k citizens</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="pop-slider" class="form-slider" min="1000" max="500000" step="1000"
+                        value="20000" oninput="handlePopSlider(this.value)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Construction Time</label>
+                    <span id="time-val" class="slider-value">10 Months</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="time-slider" class="form-slider" min="1" max="48" value="10"
+                        oninput="handleTimeSlider(this.value)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Current Road Condition</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="cond-poor" name="road-condition" value="Poor" checked>
+                        <label for="cond-poor" class="segment-label">Poor</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="cond-fair" name="road-condition" value="Fair">
+                        <label for="cond-fair" class="segment-label">Fair</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="cond-good" name="road-condition" value="Good">
+                        <label for="cond-good" class="segment-label">Good</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-run" onclick="runAISimulation()">
+                <span>&#x26A1;</span> Run AI Simulation
+            </button>
+
+            <div class="footer-logo">
+                CivicSim AI | Road Infrastructure Spatial Planning
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-panel-wrapper">
+
+            <!-- STATE 1: IDLE -->
+            <div id="panel-idle" class="idle-placeholder">
+                <div class="idle-icon">&#x1F6E3;&#xFE0F;</div>
+                <h2>AI Engine Ready</h2>
+                <p>Configure the road infrastructure parameters on the left and click <strong>"Run AI
+                        Simulation"</strong> to
+                    evaluate travel time savings, economic benefits, connectivity improvements, and project priority
+                    rankings.</p>
+            </div>
+
+            <!-- STATE 2: LOADING -->
+            <div id="panel-loading" class="loading-overlay">
+                <div class="spinner-container">
+                    <div class="spinner-outer"></div>
+                    <div class="spinner-inner"></div>
+                    <div class="spinner-core"></div>
+                </div>
+                <h3 class="loading-title">AI Engine Simulating...</h3>
+                <div id="log-console" class="loading-logs"></div>
+            </div>
+
+            <!-- STATE 3: RESULTS -->
+            <div id="panel-results" class="dashboard-results">
+
+                <div class="hero-result-card">
+                    <div class="score-circle-wrapper">
+                        <svg class="score-svg" viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="scoreGradientRoad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f59e0b" />
+                                    <stop offset="100%" stop-color="#06b6d4" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="score-bg-circle" cx="60" cy="60" r="50"></circle>
+                            <circle id="score-ring" class="score-progress-circle" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="score-text-val">
+                            <span id="lbl-overall-val">85</span>
+                            <span class="score-text-lbl">Score</span>
+                        </div>
+                    </div>
+                    <div class="hero-details">
+                        <div id="badge-priority" class="rec-badge high">&#x26A1; High Priority</div>
+                        <h3 class="hero-title" id="lbl-road-header">District Road</h3>
+                        <p class="hero-subtitle">Impact Analysis for <strong id="lbl-const-header">Madurai
+                                East</strong>. Strong connectivity improvement with high mobility-to-population index
+                            yield.</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid-row">
+                    <div class="stat-card-micro">
+                        <span class="label">Connectivity Index</span>
+                        <span class="value" id="lbl-impact-score">9.1 / 10</span>
+                        <span class="subtext">Highly Optimal</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">People Benefited</span>
+                        <span class="value" id="lbl-people-benefited">20k Citizens</span>
+                        <span class="subtext">Daily Commuters Gain</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">Economic Boost</span>
+                        <span class="value" id="lbl-economic-boost">&#x20B9;8.4 Cr/yr</span>
+                        <span class="subtext">Productivity Uplift</span>
+                    </div>
+                </div>
+
+                <div class="dash-grid-main">
+
+                    <div class="metrics-panel">
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-cyan);">&#x23F1;&#xFE0F;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Travel Time Reduction</span>
+                                    <span class="metric-desc">Average commute time saved</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill cyan" id="lbl-travel-time">-22 min (-48%)</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-emerald);">&#x26FD;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Vehicle Operating Cost</span>
+                                    <span class="metric-desc">Fuel &amp; wear savings per km</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill emerald" id="lbl-voc-saving">-&#x20B9;2.8/km</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-amber);">&#x1F4B0;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Estimated Project Cost</span>
+                                    <span class="metric-desc">AI projection with overrun factors</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill amber" id="lbl-est-cost">&#x20B9;24.7 Cr</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: #ffffff;">&#x1F4C5;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Completion Time</span>
+                                    <span class="metric-desc">Estimated build lifecycle</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-completion-time">10 Months</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-cyan);">&#x1F3D7;&#xFE0F;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Surface Quality Grade</span>
+                                    <span class="metric-desc">Durability &amp; pavement standard</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill cyan" id="lbl-quality-grade">Premium Bitumen</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-amber);">&#x26A0;&#xFE0F;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Construction Risk</span>
+                                    <span class="metric-desc">Terrain &amp; logistics compliance</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-risk">Low Risk</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-emerald);">&#x1F6E1;&#xFE0F;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Road Safety Index</span>
+                                    <span class="metric-desc">Accident reduction potential</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill emerald" id="lbl-safety">High Safety</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: #ffffff;">&#x1F697;</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Congestion Relief</span>
+                                    <span class="metric-desc">Peak-hour traffic decongestion</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-congestion">Significant</span>
+                        </div>
+
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                        <div class="chart-box-panel">
+                            <div class="chart-title">
+                                <span>Travel Time Reduction</span>
+                                <span style="font-size: 0.8rem; color: var(--neon-amber);"
+                                    id="lbl-travel-chart-diff">-48%</span>
+                            </div>
+                            <span class="chart-desc-micro">Average commute time before vs after improvement
+                                (mins)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 150">
+                                    <defs>
+                                        <linearGradient id="amberGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#f59e0b" />
+                                            <stop offset="100%" stop-color="rgba(245, 158, 11, 0.2)" />
+                                        </linearGradient>
+                                        <linearGradient id="cyanGradientRoad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#06b6d4" />
+                                            <stop offset="100%" stop-color="rgba(6, 182, 212, 0.2)" />
+                                        </linearGradient>
+                                    </defs>
+                                    <line x1="30" y1="120" x2="180" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+                                    <line x1="30" y1="20" x2="30" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+                                    <line x1="30" y1="70" x2="180" y2="70" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+                                    <line x1="30" y1="35" x2="180" y2="35" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+                                    <text x="22" y="123" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">0m</text>
+                                    <text x="22" y="73" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">25m</text>
+                                    <text x="22" y="38" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">50m</text>
+                                    <rect class="bar-bg" x="60" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-before" class="bar-active-1" x="60" y="40" width="30"
+                                        height="80"></rect>
+                                    <text x="75" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">Before</text>
+                                    <text id="chart-bar-before-lbl" x="75" y="35" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">45 min</text>
+                                    <rect class="bar-bg" x="120" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-after" class="bar-active-2" x="120" y="68" width="30"
+                                        height="52"></rect>
+                                    <text x="135" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">After (AI)</text>
+                                    <text id="chart-bar-after-lbl" x="135" y="63" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">23 min</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="chart-box-panel">
+                            <div class="chart-title"><span>Road Optimization Scores</span></div>
+                            <span class="chart-desc-micro">Infrastructure fit factor scores (0-100)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 180">
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="20"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="40"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="60"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="75"></circle>
+                                    <line class="radar-axis" x1="100" y1="90" x2="100" y2="15"></line>
+                                    <line class="radar-axis" x1="100" y1="90" x2="171.3" y2="66.8"></line>
+                                    <line class="radar-axis" x1="100" y1="90" x2="144" y2="150.7"></line>
+                                    <line class="radar-axis" x1="100" y1="90" x2="56" y2="150.7"></line>
+                                    <line class="radar-axis" x1="100" y1="90" x2="28.7" y2="66.8"></line>
+                                    <text x="100" y="10" class="radar-label">Connectivity</text>
+                                    <text x="176" y="65" class="radar-label" style="text-anchor: start;">Economic</text>
+                                    <text x="148" y="160" class="radar-label" style="text-anchor: start;">Cost
+                                        Fit</text>
+                                    <text x="52" y="160" class="radar-label" style="text-anchor: end;">Eco-Impact</text>
+                                    <text x="24" y="65" class="radar-label" style="text-anchor: end;">Safety</text>
+                                    <polygon id="radar-poly" class="radar-polygon-filled"
+                                        points="100,90 100,90 100,90 100,90 100,90"></polygon>
+                                </svg>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="reasoning-panel">
+                    <div class="reasoning-title-bar">
+                        <span>&#x2728;</span>
+                        <span>AI Simulation Summary &amp; Reasoning</span>
+                    </div>
+                    <p id="lbl-reasoning-text" class="reasoning-text">
+                        Loading road infrastructure recommendation model...
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const constituencyDatabase = {
+            "Madurai": ["Madurai East", "Madurai West", "Madurai Central", "Melur", "Thirumangalam"],
+            "Chennai": ["Velachery", "Mylapore", "Royapuram", "Anna Nagar", "T. Nagar"],
+            "Coimbatore": ["Coimbatore North", "Coimbatore South", "Singanallur", "Kavundampalayam"]
+        };
+
+        const constituencyStats = {
+            "Madurai East": { population: 180000, roadConditionBase: 0.35, density: "High", travelBefore: 42 },
+            "Madurai West": { population: 220000, roadConditionBase: 0.45, density: "High", travelBefore: 36 },
+            "Madurai Central": { population: 250000, roadConditionBase: 0.65, density: "Extreme", travelBefore: 26 },
+            "Melur": { population: 140000, roadConditionBase: 0.20, density: "Low", travelBefore: 65 },
+            "Thirumangalam": { population: 160000, roadConditionBase: 0.25, density: "Moderate", travelBefore: 55 },
+            "Velachery": { population: 310000, roadConditionBase: 0.60, density: "Very High", travelBefore: 30 },
+            "Mylapore": { population: 260000, roadConditionBase: 0.72, density: "Extreme", travelBefore: 22 },
+            "Royapuram": { population: 380000, roadConditionBase: 0.48, density: "Extreme", travelBefore: 35 },
+            "Anna Nagar": { population: 290000, roadConditionBase: 0.68, density: "High", travelBefore: 25 },
+            "T. Nagar": { population: 240000, roadConditionBase: 0.70, density: "Extreme", travelBefore: 24 },
+            "Coimbatore North": { population: 290000, roadConditionBase: 0.55, density: "High", travelBefore: 32 },
+            "Coimbatore South": { population: 340000, roadConditionBase: 0.58, density: "Extreme", travelBefore: 28 },
+            "Singanallur": { population: 220000, roadConditionBase: 0.48, density: "High", travelBefore: 35 },
+            "Kavundampalayam": { population: 380000, roadConditionBase: 0.40, density: "High", travelBefore: 40 }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialConstituency = urlParams.get('constituency') || "Madurai East";
+            let initialDistrict = "Madurai";
+            for (const dist in constituencyDatabase) {
+                if (constituencyDatabase[dist].includes(initialConstituency)) { initialDistrict = dist; break; }
+            }
+            document.getElementById('district-select').value = initialDistrict;
+            updateConstituencies();
+            document.getElementById('constituency-select').value = initialConstituency;
+            updateDynamicDefaults();
+        });
+
+        function updateConstituencies() {
+            const dist = document.getElementById('district-select').value;
+            const constSelect = document.getElementById('constituency-select');
+            constSelect.innerHTML = "";
+            constituencyDatabase[dist].forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c;
+                constSelect.appendChild(opt);
+            });
+            updateDynamicDefaults();
+        }
+
+        function handleLengthSlider(val) {
+            document.getElementById('length-val').textContent = val + ' km';
+            const type = document.querySelector('input[name="road-type"]:checked').value;
+            const category = document.querySelector('input[name="road-category"]:checked').value;
+            let costPerKm = 1.2;
+            if (type === "Concrete") costPerKm = 1.8;
+            if (type === "4-Lane NH") costPerKm = 6.5;
+            if (category === "Village Road") costPerKm *= 0.6;
+            if (category === "State Highway") costPerKm *= 1.5;
+            const estBudget = Math.min(500, Math.round(val * costPerKm));
+            document.getElementById('budget-slider').value = estBudget;
+            document.getElementById('budget-val').textContent = '\u20B9' + estBudget + ' Crore';
+        }
+
+        function handleBudgetSlider(val) {
+            document.getElementById('budget-val').textContent = '\u20B9' + val + ' Crore';
+        }
+
+        function handleTrafficSlider(val) {
+            const formatted = val >= 1000 ? (val / 1000).toFixed(1) + 'k vehicles/day' : val + ' vehicles/day';
+            document.getElementById('traffic-vol-val').textContent = formatted;
+        }
+
+        function handlePopSlider(val) {
+            let label = val >= 100000 ? (val / 100000).toFixed(1) + ' Lakhs' : (val / 1000).toFixed(0) + 'k citizens';
+            document.getElementById('pop-val').textContent = label;
+        }
+
+        function handleTimeSlider(val) {
+            document.getElementById('time-val').textContent = val + ' Months';
+        }
+
+        function handleCategoryChange() {
+            const category = document.querySelector('input[name="road-category"]:checked').value;
+            let defaultLength = 18, defaultTime = 10;
+            if (category === "Village Road") { defaultLength = 5; defaultTime = 4; }
+            else if (category === "State Highway") { defaultLength = 60; defaultTime = 24; }
+            document.getElementById('length-slider').value = defaultLength;
+            handleLengthSlider(defaultLength);
+            document.getElementById('time-slider').value = defaultTime;
+            document.getElementById('time-val').textContent = defaultTime + ' Months';
+        }
+
+        function handleTypeChange() {
+            handleLengthSlider(parseInt(document.getElementById('length-slider').value));
+        }
+
+        function updateDynamicDefaults(overrideSliders = true) {
+            const consName = document.getElementById('constituency-select').value;
+            if (!consName) return;
+            const stats = constituencyStats[consName];
+            if (stats && overrideSliders) {
+                const popSegment = Math.round(stats.population * 0.12);
+                document.getElementById('pop-slider').value = popSegment;
+                handlePopSlider(popSegment);
+                const trafficMap = { "Extreme": 50000, "Very High": 35000, "High": 20000, "Moderate": 10000, "Low": 4000 };
+                const trafficDefault = trafficMap[stats.density] || 8000;
+                document.getElementById('traffic-slider').value = trafficDefault;
+                handleTrafficSlider(trafficDefault);
+                if (stats.roadConditionBase <= 0.3) document.getElementById('cond-poor').checked = true;
+                else if (stats.roadConditionBase <= 0.6) document.getElementById('cond-fair').checked = true;
+                else document.getElementById('cond-good').checked = true;
+            }
+        }
+
+        const loadingSteps = [
+            "Initializing road infrastructure impact simulation model (v2.1)...",
+            "Retrieving regional road network connectivity and terrain mapping...",
+            "Overlaying traffic density databases and daily commuter flow metrics...",
+            "Simulating travel-time improvements and vehicle operating cost savings...",
+            "Analyzing construction terrain factors and material supply chains...",
+            "Calculating road safety indices and accident risk reduction potential...",
+            "Running budget adequacy and construction timeline optimizers...",
+            "Compiling road dashboard analytics and economic output forecasts..."
+        ];
+
+        function runAISimulation() {
+            document.getElementById('panel-idle').style.display = 'none';
+            document.getElementById('panel-results').style.display = 'none';
+            const loadingPanel = document.getElementById('panel-loading');
+            loadingPanel.style.display = 'flex';
+            const consoleBox = document.getElementById('log-console');
+            consoleBox.innerHTML = "";
+            let delay = 0;
+            loadingSteps.forEach((step, idx) => {
+                setTimeout(() => {
+                    const log = document.createElement('div');
+                    log.className = 'log-entry';
+                    log.innerHTML = '<span style="color: var(--neon-amber); font-weight: bold;">[' + ((idx * 0.35) + 0.1).toFixed(1) + 's]</span> <span>' + step + '</span>';
+                    consoleBox.appendChild(log);
+                    consoleBox.scrollTop = consoleBox.scrollHeight;
+                }, delay);
+                delay += 250 + Math.random() * 200;
+            });
+            setTimeout(() => {
+                loadingPanel.style.display = 'none';
+                calculateAndRenderSimulationResults();
+            }, delay + 400);
+        }
+
+        function calculateAndRenderSimulationResults() {
+            const roadName = document.getElementById('road-name').value;
+            const district = document.getElementById('district-select').value;
+            const constituency = document.getElementById('constituency-select').value;
+            const location = document.getElementById('location-name').value;
+            const budget = parseFloat(document.getElementById('budget-slider').value);
+            const length = parseInt(document.getElementById('length-slider').value);
+            const trafficVol = parseInt(document.getElementById('traffic-slider').value);
+            const population = parseInt(document.getElementById('pop-slider').value);
+            const buildTime = parseInt(document.getElementById('time-slider').value);
+            const category = document.querySelector('input[name="road-category"]:checked').value;
+            const roadType = document.querySelector('input[name="road-type"]:checked').value;
+            const condition = document.querySelector('input[name="road-condition"]:checked').value;
+
+            const profile = constituencyStats[constituency] || { population: population * 8, roadConditionBase: 0.4, density: "High", travelBefore: 40 };
+
+            let condMultiplier = 1.0;
+            if (condition === "Poor") condMultiplier = 1.8;
+            if (condition === "Fair") condMultiplier = 1.3;
+            if (condition === "Good") condMultiplier = 0.6;
+
+            let baseTravelTime = profile.travelBefore;
+            let reductionPercent = Math.min(70, Math.round(22 * condMultiplier * (length / 18)));
+            reductionPercent = Math.min(70, Math.max(10, reductionPercent));
+            let minutesSaved = Math.round(baseTravelTime * (reductionPercent / 100));
+            let finalTravelTime = baseTravelTime - minutesSaved;
+
+            let baseVOC = 4.5;
+            let vocSaving = (baseVOC * condMultiplier * 0.55).toFixed(1);
+
+            let dailyCommuters = Math.min(trafficVol, population * 0.6);
+            let annualEconBoost = ((dailyCommuters * parseFloat(vocSaving) * length * 365) / 10000000).toFixed(1);
+
+            let densityFactor = profile.density === "Extreme" ? 1.35 : (profile.density === "High" ? 1.15 : 0.85);
+            let connectivityScore = Math.min(99, Math.round(40 * condMultiplier * densityFactor * (length / 18)));
+            connectivityScore = Math.min(99, Math.max(20, connectivityScore));
+
+            let safetyScore = 0;
+            if (roadType === "Bitumen") safetyScore = 65;
+            if (roadType === "Concrete") safetyScore = 80;
+            if (roadType === "4-Lane NH") safetyScore = 90;
+            safetyScore += (condMultiplier > 1.5 ? 10 : 5);
+            safetyScore = Math.min(98, safetyScore);
+
+            let safetyDesc = "High Safety"; let safetyColorClass = "emerald";
+            if (safetyScore < 70) { safetyDesc = "Moderate Safety"; safetyColorClass = "amber"; }
+            if (safetyScore < 55) { safetyDesc = "Basic Safety"; safetyColorClass = ""; }
+
+            let qualityGrade = "Standard Bitumen"; let qualityColorClass = "amber";
+            if (roadType === "Concrete") { qualityGrade = "Durable Concrete"; qualityColorClass = "cyan"; }
+            if (roadType === "4-Lane NH") { qualityGrade = "NH-Grade Premium"; qualityColorClass = "emerald"; }
+
+            let risk = "Low Risk"; let riskColorClass = "emerald";
+            if (buildTime < 6 || (length > 50 && buildTime < 18)) { risk = "High Risk"; riskColorClass = "red"; }
+            else if (length > 25 || buildTime < 10) { risk = "Medium Risk"; riskColorClass = "amber"; }
+
+            let congestionRelief = "Significant"; let congestionColorClass = "emerald";
+            if (trafficVol > 60000 && roadType !== "4-Lane NH") { congestionRelief = "Moderate"; congestionColorClass = "amber"; }
+            if (trafficVol > 80000 && roadType !== "4-Lane NH") { congestionRelief = "Limited"; congestionColorClass = ""; }
+
+            let costPerKmNeeded = 1.2;
+            if (roadType === "Concrete") costPerKmNeeded = 1.8;
+            if (roadType === "4-Lane NH") costPerKmNeeded = 6.5;
+            if (category === "Village Road") costPerKmNeeded *= 0.6;
+            if (category === "State Highway") costPerKmNeeded *= 1.5;
+            let requiredBudget = length * costPerKmNeeded;
+            let budgetAdequacy = Math.min(100, (budget / requiredBudget) * 100);
+
+            let riskPenalty = (risk === "High Risk") ? 18 : ((risk === "Medium Risk") ? 6 : 0);
+            let overallScore = Math.round(
+                (connectivityScore * 0.30) + (safetyScore * 0.25) + (budgetAdequacy * 0.25) + (reductionPercent * 0.20)
+            ) - riskPenalty;
+            overallScore = Math.min(99, Math.max(30, overallScore));
+
+            let priorityText = "\u26A1 High Priority"; let priorityClass = "high"; let recommendText = "Highly Recommended";
+            if (overallScore < 55) { priorityText = "\u26A0\uFE0F Low Priority"; priorityClass = "low"; recommendText = "Needs Review"; }
+            else if (overallScore < 75) { priorityText = "\u1F5D3\uFE0F Medium Priority"; priorityClass = "medium"; recommendText = "Recommended"; }
+
+            let ecoScore = Math.min(99, Math.max(20, 90 - (trafficVol / 100000) * 50));
+
+            // Render
+            document.getElementById('lbl-overall-val').textContent = overallScore;
+            document.getElementById('score-ring').style.strokeDashoffset = 314 - (overallScore / 100) * 314;
+            document.getElementById('lbl-road-header').textContent = category;
+            document.getElementById('lbl-const-header').textContent = constituency;
+            const badge = document.getElementById('badge-priority');
+            badge.textContent = priorityText; badge.className = 'rec-badge ' + priorityClass;
+
+            document.getElementById('lbl-impact-score').textContent = (connectivityScore / 10).toFixed(1) + ' / 10';
+            document.getElementById('lbl-people-benefited').textContent =
+                population >= 100000 ? (population / 100000).toFixed(1) + 'L Citizens' : (population / 1000).toFixed(0) + 'k Citizens';
+            document.getElementById('lbl-economic-boost').textContent = '\u20B9' + annualEconBoost + ' Cr/yr';
+
+            document.getElementById('lbl-travel-time').textContent = '-' + minutesSaved + ' min (-' + reductionPercent + '%)';
+            document.getElementById('lbl-voc-saving').textContent = '-\u20B9' + vocSaving + '/km';
+            document.getElementById('lbl-est-cost').textContent = '\u20B9' + (budget * 1.03).toFixed(1) + ' Cr';
+            document.getElementById('lbl-completion-time').textContent = buildTime + ' Months';
+
+            const qualityPill = document.getElementById('lbl-quality-grade');
+            qualityPill.textContent = qualityGrade; qualityPill.className = 'metric-val-pill ' + qualityColorClass;
+            const riskPill = document.getElementById('lbl-risk');
+            riskPill.textContent = risk; riskPill.className = 'metric-val-pill ' + riskColorClass;
+            const safetyPill = document.getElementById('lbl-safety');
+            safetyPill.textContent = safetyDesc; safetyPill.className = 'metric-val-pill ' + safetyColorClass;
+            const congestionPill = document.getElementById('lbl-congestion');
+            congestionPill.textContent = congestionRelief; congestionPill.className = 'metric-val-pill ' + congestionColorClass;
+
+            // Bar chart
+            const beforeHeight = Math.min(100, Math.round(baseTravelTime * 1.5));
+            const afterHeight = Math.min(100, Math.round(finalTravelTime * 1.5));
+            const beforeBar = document.getElementById('chart-bar-before');
+            const afterBar = document.getElementById('chart-bar-after');
+            beforeBar.setAttribute('height', beforeHeight); beforeBar.setAttribute('y', 120 - beforeHeight);
+            document.getElementById('chart-bar-before-lbl').setAttribute('y', 115 - beforeHeight);
+            document.getElementById('chart-bar-before-lbl').textContent = baseTravelTime + ' min';
+            afterBar.setAttribute('height', afterHeight); afterBar.setAttribute('y', 120 - afterHeight);
+            document.getElementById('chart-bar-after-lbl').setAttribute('y', 115 - afterHeight);
+            document.getElementById('chart-bar-after-lbl').textContent = finalTravelTime + ' min';
+            document.getElementById('lbl-travel-chart-diff').textContent = '-' + reductionPercent + '%';
+
+            // Radar
+            let vConnect = Math.min(100, Math.max(10, connectivityScore));
+            let vEcon = Math.min(100, Math.max(10, Math.round(parseFloat(annualEconBoost) * 8)));
+            let vCostFit = Math.min(100, Math.max(10, Math.round(budgetAdequacy)));
+            let vEco = Math.min(100, Math.max(10, Math.round(ecoScore)));
+            let vSafety = Math.min(100, Math.max(10, safetyScore));
+
+            let r0 = (vConnect / 100) * 75, r1 = (vEcon / 100) * 75, r2 = (vCostFit / 100) * 75,
+                r3 = (vEco / 100) * 75, r4 = (vSafety / 100) * 75;
+            let p0 = '100,' + (90 - r0);
+            let p1 = (100 + r1 * 0.95) + ',' + (90 - r1 * 0.31);
+            let p2 = (100 + r2 * 0.59) + ',' + (90 + r2 * 0.81);
+            let p3 = (100 - r3 * 0.59) + ',' + (90 + r3 * 0.81);
+            let p4 = (100 - r4 * 0.95) + ',' + (90 - r4 * 0.31);
+            document.getElementById('radar-poly').setAttribute('points', p0 + ' ' + p1 + ' ' + p2 + ' ' + p3 + ' ' + p4);
+
+            // Reasoning
+            const popLabel = population >= 100000 ? (population / 100000).toFixed(1) + ' Lakh' : (population / 1000).toFixed(0) + 'k';
+            const reasoning =
+                'Developing this <strong>' + length + '-km ' + category + '</strong> with <strong>' + roadType + ' surface</strong> along ' +
+                '<strong>' + location + '</strong> in <strong>' + constituency + '</strong> will reduce average travel time by ' +
+                '<strong>' + minutesSaved + ' minutes (' + reductionPercent + '%)</strong> and cut vehicle operating costs by ' +
+                '<strong>\u20B9' + vocSaving + '/km</strong>. The project will benefit approximately <strong>' + popLabel +
+                ' citizens</strong> with an estimated annual economic uplift of <strong>\u20B9' + annualEconBoost +
+                ' Crore</strong>. This project is <strong>' + recommendText.toLowerCase() +
+                '</strong> and ranks as a <strong>' + priorityText.replace('\u26A1 ', '').replace('\u26A0\uFE0F ', '').replace('\u1F5D3\uFE0F ', '') +
+                '</strong> capital infrastructure initiative.';
+
+            document.getElementById('lbl-reasoning-text').innerHTML = reasoning;
+            document.getElementById('panel-results').style.display = 'flex';
+        }
+    </script>
+</body>
+
+</html>

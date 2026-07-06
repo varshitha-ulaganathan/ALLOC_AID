@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI School Impact Simulator</title>
+    <!-- Modern Premium Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e6e8ea;
+            --panel-bg: rgba(13, 20, 35, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.06);
+            --text-main: #3e419c;
+            --text-muted: #9ca3af;
+
+            /* Neon Accents */
+            --neon-purple: #a855f7;
+            --neon-purple-glow: rgba(168, 85, 247, 0.35);
+            --neon-cyan: #06b6d4;
+            --neon-cyan-glow: rgba(6, 182, 212, 0.35);
+            --neon-emerald: #10b981;
+            --neon-emerald-glow: rgba(16, 185, 129, 0.35);
+            --neon-amber: #f59e0b;
+            --neon-amber-glow: rgba(245, 158, 11, 0.35);
+            --neon-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+        }
+
+        /* Top Header Nav */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+            background: rgba(8, 12, 20, 0.6);
+            border-bottom: 1px solid var(--panel-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-symbol {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav-back:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Layout Grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+        }
+
+        .glass-panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            border-left: 3px solid var(--neon-purple);
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-input option,
+        .form-input optgroup {
+            color: #111827;
+            background-color: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Sliders */
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .slider-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .form-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px var(--neon-cyan);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--neon-cyan);
+        }
+
+        /* Segmented Radio Controls */
+        .segmented-control {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .segment-btn {
+            position: relative;
+        }
+
+        .segment-btn input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .segment-label {
+            display: block;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.3s;
+        }
+
+        .segment-btn input:checked+.segment-label {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #ffffff;
+            text-shadow: 0 0 5px var(--neon-purple-glow);
+        }
+
+        /* Glow Button */
+        .btn-run {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.5);
+            background: linear-gradient(135deg, #b975ff, #22d3ee);
+        }
+
+        .btn-run:active {
+            transform: translateY(0);
+        }
+
+        /* Right Panel States */
+        .right-panel-wrapper {
+            position: relative;
+            min-height: 500px;
+        }
+
+        /* State 1: Idle Placeholder */
+        .idle-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            height: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            background: rgba(13, 20, 35, 0.3);
+        }
+
+        .idle-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .idle-placeholder h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .idle-placeholder p {
+            color: var(--text-muted);
+            max-width: 400px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* State 2: Simulated Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: rgba(8, 12, 20, 0.92);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-shadow: inset 0 0 40px rgba(124, 58, 237, 0.1);
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 2rem;
+        }
+
+        .spinner-outer {
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: var(--neon-purple);
+            border-bottom-color: var(--neon-cyan);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-inner {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 70px;
+            height: 70px;
+            border: 3px solid transparent;
+            border-left-color: var(--neon-emerald);
+            border-right-color: var(--neon-amber);
+            border-radius: 50%;
+            animation: spin-reverse 2s linear infinite;
+        }
+
+        .spinner-core {
+            position: absolute;
+            top: 35px;
+            left: 35px;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ffffff;
+            animation: pulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            to {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .loading-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .loading-logs {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--neon-cyan);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            max-width: 480px;
+            height: 120px;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-shadow: 0 0 4px rgba(6, 182, 212, 0.3);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(5px);
+            animation: slide-up-log 0.2s forwards;
+        }
+
+        @keyframes slide-up-log {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* State 3: Dashboard Results */
+        .dashboard-results {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fade-in 0.5s ease-out forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Overall AI Score and Recommendation Hero Card */
+        .hero-result-card {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .hero-result-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Radial progress gauge */
+        .score-circle-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-bg-circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.06);
+            stroke-width: 8;
+        }
+
+        .score-progress-circle {
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-text-val {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .score-text-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        .hero-details {
+            flex-grow: 1;
+        }
+
+        .rec-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--neon-emerald);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .rec-badge.high {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--neon-emerald);
+        }
+
+        .rec-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--neon-amber);
+        }
+
+        .rec-badge.low {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--neon-red);
+        }
+
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* 3-Column Quick Stats */
+        .stats-grid-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card-micro {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-card-micro .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-card-micro .value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-card-micro .subtext {
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            font-weight: 500;
+        }
+
+        /* 2-Column Main Dashboard Grid */
+        .dash-grid-main {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 800px) {
+            .dash-grid-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dynamic Metrics List */
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .metric-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-row-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .metric-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .metric-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .metric-val-pill {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-val-pill.emerald {
+            color: var(--neon-emerald);
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .metric-val-pill.cyan {
+            color: var(--neon-cyan);
+            background: rgba(6, 182, 212, 0.06);
+            border-color: rgba(6, 182, 212, 0.15);
+        }
+
+        .metric-val-pill.amber {
+            color: var(--neon-amber);
+            background: rgba(245, 158, 11, 0.06);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .metric-val-pill.red {
+            color: var(--neon-red);
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+
+        /* SVG Chart Blocks */
+        .chart-box-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-desc-micro {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -4px;
+        }
+
+        .svg-chart-container {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Radar Chart Specific styles */
+        .radar-grid-line {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1;
+        }
+
+        .radar-axis {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 1;
+            stroke-dasharray: 2, 2;
+        }
+
+        .radar-polygon-filled {
+            fill: rgba(168, 85, 247, 0.25);
+            stroke: var(--neon-purple);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px var(--neon-purple-glow));
+            transition: all 1s ease-in-out;
+        }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-size: 8px;
+            font-weight: 600;
+            text-anchor: middle;
+        }
+
+        /* Bar Chart Specific styles */
+        .bar-bg {
+            fill: rgba(255, 255, 255, 0.03);
+            rx: 6;
+        }
+
+        .bar-active-1 {
+            fill: url(#cyanGradient);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .bar-active-2 {
+            fill: url(#emeraldGradient);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.cyan {
+            background: var(--neon-cyan);
+        }
+
+        .legend-dot.emerald {
+            background: var(--neon-emerald);
+        }
+
+        /* AI Recommendation & Reasoning Card */
+        .reasoning-panel {
+            background: rgba(124, 58, 237, 0.03);
+            border: 1px dashed rgba(168, 85, 247, 0.25);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reasoning-title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neon-purple);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .reasoning-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .reasoning-text strong {
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        /* Form Footer styling */
+        .footer-logo {
+            text-align: center;
+            padding: 1.5rem 0 0.5rem 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Nav Header -->
+    <header>
+        <a href="homepage1.html" class="logo">
+            <div class="logo-symbol">🏫</div>
+            <span>EduSim AI</span>
+        </a>
+        <a href="homepage1.html" class="nav-back">
+            <span>←</span> Back to Dashboard
+        </a>
+    </header>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+
+        <!-- Left Column: Simulation Form -->
+        <div class="glass-panel">
+            <h2 class="glass-panel-title">
+                <span>Simulation Parameters</span>
+                <span
+                    style="font-size: 0.8rem; color: var(--neon-cyan); font-weight: normal; font-family: monospace;">MODEL
+                    v1.5</span>
+            </h2>
+
+            <!-- School Name -->
+            <div class="form-group">
+                <label class="form-label">School Name</label>
+                <input type="text" id="school-name" class="form-input" value="Madurai East Model School">
+            </div>
+
+            <!-- District & Constituency -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">District</label>
+                    <select id="district-select" class="form-input" onchange="updateConstituencies()">
+                        <option value="Madurai">Madurai</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Coimbatore">Coimbatore</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Constituency</label>
+                    <select id="constituency-select" class="form-input">
+                        <!-- Loaded dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+                <label class="form-label">Location / Landmark</label>
+                <input type="text" id="location-name" class="form-input" value="Othakadai Rural Junction">
+            </div>
+
+            <!-- School Level -->
+            <div class="form-group">
+                <label class="form-label">School Level</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="level-primary" name="school-level" value="Primary"
+                            onchange="handleLevelChange()">
+                        <label for="level-primary" class="segment-label">Primary</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="level-high" name="school-level" value="High School" checked
+                            onchange="handleLevelChange()">
+                        <label for="level-high" class="segment-label">High School</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="level-sec" name="school-level" value="Higher Secondary"
+                            onchange="handleLevelChange()">
+                        <label for="level-sec" class="segment-label">Hr Secondary</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- School Type Segmented Buttons -->
+            <div class="form-group">
+                <label class="form-label">School Type</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="type-gov" name="school-type" value="Government" checked
+                            onchange="handleTypeChange()">
+                        <label for="type-gov" class="segment-label">Government</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-aided" name="school-type" value="Govt Aided"
+                            onchange="handleTypeChange()">
+                        <label for="type-aided" class="segment-label">Aided</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-ppp" name="school-type" value="Public-Private"
+                            onchange="handleTypeChange()">
+                        <label for="type-ppp" class="segment-label">PPP Mode</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Project Budget</label>
+                    <span id="budget-val" class="slider-value">₹15 Crore</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="budget-slider" class="form-slider" min="1" max="80" value="15"
+                        oninput="handleBudgetSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Student Capacity Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Student Capacity</label>
+                    <span id="capacity-val" class="slider-value">800 Students</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="capacity-slider" class="form-slider" min="50" max="2500" step="25"
+                        value="800" oninput="handleCapacitySlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Teachers Required -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Teachers Required</label>
+                    <span id="teachers-val" class="slider-value">32 Teachers</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="teachers-slider" class="form-slider" min="2" max="150" value="32"
+                        oninput="handleTeachersSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Population Served -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Catchment Population</label>
+                    <span id="pop-val" class="slider-value">15k citizens</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="pop-slider" class="form-slider" min="1000" max="100000" step="1000"
+                        value="15000" oninput="handlePopSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Construction Time Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label">Construction Time</label>
+                    <span id="time-val" class="slider-value">12 Months</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="time-slider" class="form-slider" min="3" max="36" value="12"
+                        oninput="handleTimeSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Current Education Accessibility -->
+            <div class="form-group">
+                <label class="form-label">Current Accessibility Index</label>
+                <div class="segmented-control" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="segment-btn">
+                        <input type="radio" id="access-poor" name="access-index" value="Poor" checked>
+                        <label for="access-poor" class="segment-label">Poor</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="access-moderate" name="access-index" value="Moderate">
+                        <label for="access-moderate" class="segment-label">Moderate</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="access-good" name="access-index" value="Good">
+                        <label for="access-good" class="segment-label">Good</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trigger Simulation -->
+            <button class="btn-run" onclick="runAISimulation()">
+                <span>⚡</span> Run AI Simulation
+            </button>
+
+            <!-- Bottom Brand Info -->
+            <div class="footer-logo">
+                CivicSim AI | Educational Infrastructure Spatial Planning
+            </div>
+        </div>
+
+        <!-- Right Column: Dashboard and States -->
+        <div class="right-panel-wrapper">
+
+            <!-- STATE 1: IDLE PLACEHOLDER -->
+            <div id="panel-idle" class="idle-placeholder">
+                <div class="idle-icon">🎓</div>
+                <h2>AI Engine Ready</h2>
+                <p>Configure the educational parameters on the left and click <strong>"Run AI Simulation"</strong> to
+                    evaluate catchment reach, travel time savings, resource optimizations, and project priority
+                    rankings.</p>
+            </div>
+
+            <!-- STATE 2: LOADING SCREEN -->
+            <div id="panel-loading" class="loading-overlay">
+                <div class="spinner-container">
+                    <div class="spinner-outer"></div>
+                    <div class="spinner-inner"></div>
+                    <div class="spinner-core"></div>
+                </div>
+                <h3 class="loading-title">AI Engine Simulating...</h3>
+                <div id="log-console" class="loading-logs">
+                    <!-- Dynamic logs will be appended here -->
+                </div>
+            </div>
+
+            <!-- STATE 3: RESULTS DASHBOARD -->
+            <div id="panel-results" class="dashboard-results">
+
+                <!-- Hero Score Card -->
+                <div class="hero-result-card">
+                    <!-- Gauge SVG -->
+                    <div class="score-circle-wrapper">
+                        <svg class="score-svg" viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#a855f7" />
+                                    <stop offset="100%" stop-color="#06b6d4" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="score-bg-circle" cx="60" cy="60" r="50"></circle>
+                            <circle id="score-ring" class="score-progress-circle" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="score-text-val">
+                            <span id="lbl-overall-val">82</span>
+                            <span class="score-text-lbl">Score</span>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="hero-details">
+                        <div id="badge-priority" class="rec-badge high">⚡ High Priority</div>
+                        <h3 class="hero-title" id="lbl-school-header">High School</h3>
+                        <p class="hero-subtitle">Impact Analysis for <strong id="lbl-const-header">Madurai
+                                East</strong>. Optimal structural viability with advanced capacity-to-population index
+                            yield.</p>
+                    </div>
+                </div>
+
+                <!-- Fast Stats Grid -->
+                <div class="stats-grid-row">
+                    <div class="stat-card-micro">
+                        <span class="label">Educational Quality Index</span>
+                        <span class="value" id="lbl-impact-score">8.8 / 10</span>
+                        <span class="subtext">Highly Optimal</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">Students Benefited</span>
+                        <span class="value" id="lbl-students-benefited">640 Students</span>
+                        <span class="subtext">Yearly Intake Gain</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">Community Satisfaction</span>
+                        <span class="value" id="lbl-satisfaction">92%</span>
+                        <span class="subtext">Strong Support</span>
+                    </div>
+                </div>
+
+                <!-- Main Metrics List & Charts -->
+                <div class="dash-grid-main">
+
+                    <!-- Left: Metrics Breakdown -->
+                    <div class="metrics-panel">
+
+                        <!-- Accessibility / Enrollment Increase -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-cyan);">📈</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Enrollment Rate Increase</span>
+                                    <span class="metric-desc">Spatial access expansion</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill cyan" id="lbl-acc-inc">+35%</span>
+                        </div>
+
+                        <!-- Travel Time Improvement -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-emerald);">🚶</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Commute Reduction</span>
+                                    <span class="metric-desc">Daily school transit time delta</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill emerald" id="lbl-travel-time">-18 min (-40%)</span>
+                        </div>
+
+                        <!-- Estimated Cost -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-amber);">💰</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Estimated Cost</span>
+                                    <span class="metric-desc">AI projection with factors</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill amber" id="lbl-est-cost">₹16.5 Cr</span>
+                        </div>
+
+                        <!-- Completion Time -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: #ffffff;">📅</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Completion Time</span>
+                                    <span class="metric-desc">Estimated build lifecycle</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-completion-time">12 Months</span>
+                        </div>
+
+                        <!-- Infrastructure Quality -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-cyan);">🖥️</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Digital Lab Infrastructure</span>
+                                    <span class="metric-desc">Smart rooms & network level</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill cyan" id="lbl-infra-quality">Premium Class</span>
+                        </div>
+
+                        <!-- Construction Risk -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-amber);">⚠️</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Build Site Risk</span>
+                                    <span class="metric-desc">Logistics & structural compliance</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-risk">Low Risk</span>
+                        </div>
+
+                        <!-- Socio-Economic Utility -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: var(--neon-emerald);">🎓</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Socio-Economic Index</span>
+                                    <span class="metric-desc">Local literacy & future employment</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill emerald" id="lbl-social-impact">High Yield</span>
+                        </div>
+
+                        <!-- Traffic Impact -->
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon" style="color: #ffffff;">🚌</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Peak Traffic Congestion</span>
+                                    <span class="metric-desc">Bus routes & pickup zone load</span>
+                                </div>
+                            </div>
+                            <span class="metric-val-pill" id="lbl-traffic">Minimal</span>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: Dynamic SVG Charts -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                        <!-- Chart 1: Before/After Commute Times -->
+                        <div class="chart-box-panel">
+                            <div class="chart-title">
+                                <span>Travel Commute Reduction</span>
+                                <span style="font-size: 0.8rem; color: var(--neon-cyan);"
+                                    id="lbl-travel-chart-diff">-40%</span>
+                            </div>
+                            <span class="chart-desc-micro">Average transit time to nearest educational center
+                                (mins)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 150">
+                                    <defs>
+                                        <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#06b6d4" />
+                                            <stop offset="100%" stop-color="rgba(6, 182, 212, 0.2)" />
+                                        </linearGradient>
+                                        <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#10b981" />
+                                            <stop offset="100%" stop-color="rgba(16, 185, 129, 0.2)" />
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Axes / Grids -->
+                                    <line x1="30" y1="120" x2="180" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+                                    <line x1="30" y1="20" x2="30" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+
+                                    <line x1="30" y1="70" x2="180" y2="70" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+                                    <line x1="30" y1="35" x2="180" y2="35" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+
+                                    <!-- Values on Y axis -->
+                                    <text x="22" y="123" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">0m</text>
+                                    <text x="22" y="73" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">25m</text>
+                                    <text x="22" y="38" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">50m</text>
+
+                                    <!-- Bar 1: Before -->
+                                    <rect class="bar-bg" x="60" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-before" class="bar-active-1" x="60" y="40" width="30"
+                                        height="80"></rect>
+                                    <text x="75" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">Before</text>
+                                    <text id="chart-bar-before-lbl" x="75" y="35" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">45 min</text>
+
+                                    <!-- Bar 2: After -->
+                                    <rect class="bar-bg" x="120" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-after" class="bar-active-2" x="120" y="68" width="30"
+                                        height="52"></rect>
+                                    <text x="135" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">After (AI)</text>
+                                    <text id="chart-bar-after-lbl" x="135" y="63" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">27 min</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Spider radar graph -->
+                        <div class="chart-box-panel">
+                            <div class="chart-title">
+                                <span>Optimization Attributes</span>
+                            </div>
+                            <span class="chart-desc-micro">Catchment fit factor scores (0-100)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 180" id="radar-chart-svg">
+                                    <!-- Radar Background Circles -->
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="20"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="40"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="60"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="75"></circle>
+
+                                    <!-- Radar Axis Lines -->
+                                    <!-- 0 deg: Accessibility -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="100" y2="15"></line>
+                                    <!-- 72 deg: Quality -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="171.3" y2="66.8"></line>
+                                    <!-- 144 deg: Cost/Benefit Fit -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="144" y2="150.7"></line>
+                                    <!-- 216 deg: Eco Friendly -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="56" y2="150.7"></line>
+                                    <!-- 288 deg: Resource Efficiency -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="28.7" y2="66.8"></line>
+
+                                    <!-- Labels -->
+                                    <text x="100" y="10" class="radar-label">Accessibility</text>
+                                    <text x="176" y="65" class="radar-label" style="text-anchor: start;">Academic
+                                        Quality</text>
+                                    <text x="148" y="160" class="radar-label" style="text-anchor: start;">Economic
+                                        Fit</text>
+                                    <text x="52" y="160" class="radar-label"
+                                        style="text-anchor: end;">Eco-Friendly</text>
+                                    <text x="24" y="65" class="radar-label" style="text-anchor: end;">Efficiency</text>
+
+                                    <!-- Radar Polygon filled dynamically -->
+                                    <polygon id="radar-poly" class="radar-polygon-filled"
+                                        points="100,90 100,90 100,90 100,90 100,90"></polygon>
+                                </svg>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- AI reasoning panel -->
+                <div class="reasoning-panel">
+                    <div class="reasoning-title-bar">
+                        <span>✨</span>
+                        <span>AI Simulation Summary & Reasoning</span>
+                    </div>
+                    <p id="lbl-reasoning-text" class="reasoning-text">
+                        Loading educational recommendation model...
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripting for live interactions & calculations -->
+    <script>
+        // Preset demographics database for realistic calculations
+        const constituencyDatabase = {
+            "Madurai": ["Madurai East", "Madurai West", "Madurai Central", "Melur", "Thirumangalam"],
+            "Chennai": ["Velachery", "Mylapore", "Royapuram", "Anna Nagar", "T. Nagar"],
+            "Coimbatore": ["Coimbatore North", "Coimbatore South", "Singanallur", "Kavundampalayam"]
+        };
+
+        // Static database representing constituency variables
+        const constituencyStats = {
+            "Madurai East": { population: 180000, baseAccessibility: 0.38, density: "High", travelBefore: 40 },
+            "Madurai West": { population: 220000, baseAccessibility: 0.45, density: "High", travelBefore: 35 },
+            "Madurai Central": { population: 250000, baseAccessibility: 0.60, density: "Extreme", travelBefore: 28 },
+            "Melur": { population: 140000, baseAccessibility: 0.22, density: "Low", travelBefore: 60 },
+            "Thirumangalam": { population: 160000, baseAccessibility: 0.28, density: "Moderate", travelBefore: 50 },
+
+            "Velachery": { population: 310000, baseAccessibility: 0.65, density: "Very High", travelBefore: 26 },
+            "Mylapore": { population: 260000, baseAccessibility: 0.75, density: "Extreme", travelBefore: 20 },
+            "Royapuram": { population: 380000, baseAccessibility: 0.48, density: "Extreme", travelBefore: 30 },
+            "Anna Nagar": { population: 290000, baseAccessibility: 0.70, density: "High", travelBefore: 22 },
+            "T. Nagar": { population: 240000, baseAccessibility: 0.68, density: "Extreme", travelBefore: 22 },
+
+            "Coimbatore North": { population: 290000, baseAccessibility: 0.55, density: "High", travelBefore: 30 },
+            "Coimbatore South": { population: 340000, baseAccessibility: 0.60, density: "Extreme", travelBefore: 26 },
+            "Singanallur": { population: 220000, baseAccessibility: 0.50, density: "High", travelBefore: 32 },
+            "Kavundampalayam": { population: 380000, baseAccessibility: 0.42, density: "High", travelBefore: 38 }
+        };
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialConstituency = urlParams.get('constituency') || "Madurai East";
+
+            let initialDistrict = "Madurai";
+            for (const dist in constituencyDatabase) {
+                if (constituencyDatabase[dist].includes(initialConstituency)) {
+                    initialDistrict = dist;
+                    break;
+                }
+            }
+
+            // Populate District
+            const distSelect = document.getElementById('district-select');
+            distSelect.value = initialDistrict;
+
+            // Load constituencies
+            updateConstituencies();
+
+            // Select initial constituency
+            document.getElementById('constituency-select').value = initialConstituency;
+
+            // Trigger dynamic default settings
+            updateDynamicDefaults();
+        });
+
+        function updateConstituencies() {
+            const dist = document.getElementById('district-select').value;
+            const constSelect = document.getElementById('constituency-select');
+            constSelect.innerHTML = "";
+
+            constituencyDatabase[dist].forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                constSelect.appendChild(opt);
+            });
+
+            updateDynamicDefaults();
+        }
+
+        // Sliders change handlers
+        function handleBudgetSlider(val) {
+            document.getElementById('budget-val').textContent = `₹${val} Crore`;
+            updateDynamicDefaults(false);
+        }
+
+        function handleCapacitySlider(val) {
+            document.getElementById('capacity-val').textContent = `${val} Students`;
+
+            // Capacity dynamically influences recommendations for Teachers Required
+            const level = document.querySelector('input[name="school-level"]:checked').value;
+            let ratio = 25; // default 1 teacher per 25 students
+            if (level === "Primary") ratio = 20; // 1:20
+            if (level === "Higher Secondary") ratio = 30; // 1:30
+
+            const teachersNeeded = Math.max(2, Math.round(val / ratio));
+            document.getElementById('teachers-slider').value = teachersNeeded;
+            document.getElementById('teachers-val').textContent = `${teachersNeeded} Teachers`;
+
+            updateDynamicDefaults(false);
+        }
+
+        function handleTeachersSlider(val) {
+            document.getElementById('teachers-val').textContent = `${val} Teachers`;
+        }
+
+        function handlePopSlider(val) {
+            let label = "";
+            if (val >= 100000) {
+                label = `${(val / 100000).toFixed(1)} Lakhs`;
+            } else {
+                label = `${(val / 1000).toFixed(0)}k citizens`;
+            }
+            document.getElementById('pop-val').textContent = label;
+        }
+
+        function handleTimeSlider(val) {
+            document.getElementById('time-val').textContent = `${val} Months`;
+        }
+
+        function handleLevelChange() {
+            const level = document.querySelector('input[name="school-level"]:checked').value;
+            let defaultCapacity = 800;
+            let defaultBudget = 15;
+            let defaultTime = 12;
+
+            if (level === "Primary") {
+                defaultCapacity = 400;
+                defaultBudget = 6;
+                defaultTime = 9;
+            } else if (level === "Higher Secondary") {
+                defaultCapacity = 1200;
+                defaultBudget = 28;
+                defaultTime = 18;
+            }
+
+            document.getElementById('capacity-slider').value = defaultCapacity;
+            document.getElementById('capacity-val').textContent = `${defaultCapacity} Students`;
+
+            document.getElementById('budget-slider').value = defaultBudget;
+            document.getElementById('budget-val').textContent = `₹${defaultBudget} Crore`;
+
+            document.getElementById('time-slider').value = defaultTime;
+            document.getElementById('time-val').textContent = `${defaultTime} Months`;
+
+            // Compute teachers
+            let ratio = 25;
+            if (level === "Primary") ratio = 20;
+            if (level === "Higher Secondary") ratio = 30;
+            const teachersNeeded = Math.max(2, Math.round(defaultCapacity / ratio));
+
+            document.getElementById('teachers-slider').value = teachersNeeded;
+            document.getElementById('teachers-val').textContent = `${teachersNeeded} Teachers`;
+        }
+
+        function handleTypeChange() {
+            const type = document.querySelector('input[name="school-type"]:checked').value;
+            const level = document.querySelector('input[name="school-level"]:checked').value;
+            let budgetAdjustment = 1.0;
+
+            if (type === "Govt Aided") {
+                budgetAdjustment = 0.85; // Aided might share build/grant parameters
+            } else if (type === "Public-Private") {
+                budgetAdjustment = 1.2; // PPP might feature additional infrastructure assets
+            }
+
+            let baseBudget = 15;
+            if (level === "Primary") baseBudget = 6;
+            if (level === "Higher Secondary") baseBudget = 28;
+
+            const adjustedBudget = Math.round(baseBudget * budgetAdjustment);
+            document.getElementById('budget-slider').value = adjustedBudget;
+            document.getElementById('budget-val').textContent = `₹${adjustedBudget} Crore`;
+        }
+
+        function updateDynamicDefaults(overrideSliders = true) {
+            const consName = document.getElementById('constituency-select').value;
+            if (!consName) return;
+
+            const stats = constituencyStats[consName];
+            if (stats && overrideSliders) {
+                document.getElementById('pop-slider').value = stats.population * 0.15; // approximate school-going family segment size
+                handlePopSlider(stats.population * 0.15);
+
+                if (stats.baseAccessibility <= 0.3) {
+                    document.getElementById('access-poor').checked = true;
+                } else if (stats.baseAccessibility <= 0.6) {
+                    document.getElementById('access-moderate').checked = true;
+                } else {
+                    document.getElementById('access-good').checked = true;
+                }
+            }
+        }
+
+        // Loading steps stream
+        const loadingSteps = [
+            "Initializing educational demographic simulation model (v1.5)...",
+            "Retrieving regional school network density and transportation mapping...",
+            "Overlaying household survey databases and local youth population metrics...",
+            "Simulating access improvements and classroom enrollment expansion...",
+            "Analyzing build-site accessibility factors and safety parameters...",
+            "Checking pupil-to-teacher configurations against national standard ratios...",
+            "Running budget sufficiency and build timeline optimizers...",
+            "Compiling school dashboard analytics and educational output forecasts..."
+        ];
+
+        function runAISimulation() {
+            document.getElementById('panel-idle').style.display = 'none';
+            document.getElementById('panel-results').style.display = 'none';
+
+            const loadingPanel = document.getElementById('panel-loading');
+            loadingPanel.style.display = 'flex';
+
+            const consoleBox = document.getElementById('log-console');
+            consoleBox.innerHTML = "";
+
+            let delay = 0;
+            loadingSteps.forEach((step, idx) => {
+                setTimeout(() => {
+                    const log = document.createElement('div');
+                    log.className = 'log-entry';
+                    log.innerHTML = `<span style="color: var(--neon-cyan); font-weight: bold;">[${((idx * 0.35) + 0.1).toFixed(1)}s]</span> <span>${step}</span>`;
+                    consoleBox.appendChild(log);
+                    consoleBox.scrollTop = consoleBox.scrollHeight;
+                }, delay);
+                delay += 250 + Math.random() * 200;
+            });
+
+            setTimeout(() => {
+                loadingPanel.style.display = 'none';
+                calculateAndRenderSimulationResults();
+            }, delay + 400);
+        }
+
+        function calculateAndRenderSimulationResults() {
+            // Inputs
+            const schoolName = document.getElementById('school-name').value;
+            const district = document.getElementById('district-select').value;
+            const constituency = document.getElementById('constituency-select').value;
+            const location = document.getElementById('location-name').value;
+            const budget = parseFloat(document.getElementById('budget-slider').value);
+            const capacity = parseInt(document.getElementById('capacity-slider').value);
+            const teachers = parseInt(document.getElementById('teachers-slider').value);
+            const population = parseInt(document.getElementById('pop-slider').value);
+            const buildTime = parseInt(document.getElementById('time-slider').value);
+
+            const level = document.querySelector('input[name="school-level"]:checked').value;
+            const type = document.querySelector('input[name="school-type"]:checked').value;
+            const accessIndex = document.querySelector('input[name="access-index"]:checked').value;
+
+            // Profile stats
+            const profile = constituencyStats[constituency] || { population: population * 6, baseAccessibility: 0.4, density: "High", travelBefore: 40 };
+
+            // Math Logic
+            // 1. Enrollment Access Increase calculation
+            let accessibilityMultiplier = 1.0;
+            if (accessIndex === "Poor") accessibilityMultiplier = 1.7;
+            if (accessIndex === "Moderate") accessibilityMultiplier = 1.25;
+            if (accessIndex === "Good") accessibilityMultiplier = 0.55;
+
+            let scaleFactor = capacity / 800.0;
+            let densityFactor = profile.density === "Extreme" ? 1.4 : (profile.density === "High" ? 1.15 : 0.85);
+
+            let rawAccessIncrease = Math.min(90, Math.round(28 * scaleFactor * accessibilityMultiplier * densityFactor));
+            if (rawAccessIncrease < 10) rawAccessIncrease = 12;
+
+            // 2. Travel Commute Time Saved
+            let baseTravelTime = profile.travelBefore;
+            let reductionPercent = Math.min(65, Math.round(18 * scaleFactor * accessibilityMultiplier + 8));
+            let minutesSaved = Math.round(baseTravelTime * (reductionPercent / 100));
+            let finalTravelTime = baseTravelTime - minutesSaved;
+
+            // 3. Community Satisfaction
+            let costPerStudent = budget / capacity; // standard cost benchmark: 0.015 to 0.035 Cr per student capacity
+            let budgetAdequacy = (costPerStudent >= 0.02) ? 100 : (costPerStudent / 0.02) * 100;
+            let satisfaction = Math.round(72 + (capacity / 2500) * 15 + (budgetAdequacy * 0.08) + (accessIndex === "Poor" ? 7 : 1));
+            satisfaction = Math.min(97, Math.max(60, satisfaction));
+
+            // 4. Infrastructure Grade
+            let infraQuality = "Basic Classrooms";
+            let infraColorClass = "";
+            if (budget > 12) {
+                infraQuality = "Smart Lab System";
+                infraColorClass = "cyan";
+            }
+            if (budget > 25) {
+                infraQuality = "Premium Digital Facility";
+                infraColorClass = "emerald";
+            }
+
+            // 5. Build Risk
+            let risk = "Low Risk";
+            let riskColorClass = "emerald";
+            if (buildTime < 9 || (capacity > 1000 && buildTime < 18)) {
+                risk = "High Risk";
+                riskColorClass = "red";
+            } else if (capacity > 600 || buildTime < 12) {
+                risk = "Medium Risk";
+                riskColorClass = "amber";
+            }
+
+            // 6. Socio-Economic Yield
+            // Higher for secondary, and high capacity / teacher ratios
+            let pupilTeacherRatio = capacity / teachers;
+            let teacherFactor = (pupilTeacherRatio >= 20 && pupilTeacherRatio <= 35) ? 15 : 5;
+            let socialIndex = Math.round(30 + (level === "Higher Secondary" ? 30 : 15) + teacherFactor + (rawAccessIncrease * 0.3));
+            socialIndex = Math.min(98, socialIndex);
+
+            let socialDesc = "High Yield";
+            let socialColorClass = "emerald";
+            if (socialIndex < 65) {
+                socialDesc = "Standard Yield";
+                socialColorClass = "";
+            } else if (socialIndex < 45) {
+                socialDesc = "Basic";
+                socialColorClass = "amber";
+            }
+
+            // 7. Peak Congestion
+            let traffic = "Low";
+            let trafficColorClass = "";
+            if (capacity > 1000 && profile.density === "Extreme") {
+                traffic = "High";
+                trafficColorClass = "red";
+            } else if (capacity > 600 || profile.density === "High") {
+                traffic = "Medium";
+                trafficColorClass = "amber";
+            }
+
+            // 8. Overall AI priority score
+            let riskPenalty = (risk === "High Risk") ? 18 : ((risk === "Medium Risk") ? 6 : 0);
+            let efficiencyComponent = Math.min(100, Math.round(budgetAdequacy));
+            let overallScore = Math.round((rawAccessIncrease * 0.35) + (socialIndex * 0.3) + (efficiencyComponent * 0.35) - riskPenalty);
+            overallScore = Math.min(99, Math.max(35, overallScore));
+
+            let priorityText = "⚡ High Priority";
+            let priorityClass = "high";
+            let recommendText = "Highly Recommended";
+            if (overallScore < 58) {
+                priorityText = "⚠️ Low Priority";
+                priorityClass = "low";
+                recommendText = "Alternative Proposed";
+            } else if (overallScore < 76) {
+                priorityText = "🗓️ Medium Priority";
+                priorityClass = "medium";
+                recommendText = "Recommended";
+            }
+
+            // Student Benefit math
+            let studentsBenefited = Math.round(capacity * 0.85); // immediate intake filled
+
+            // Proj cost projection
+            let projectedCost = (budget * 1.03).toFixed(1);
+
+            // Render output fields
+            document.getElementById('lbl-overall-val').textContent = overallScore;
+
+            // Set stroke dash offset
+            const circle = document.getElementById('score-ring');
+            const circumference = 314;
+            const offset = circumference - (overallScore / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            document.getElementById('lbl-school-header').textContent = `${level} School`;
+            document.getElementById('lbl-const-header').textContent = constituency;
+
+            const priorityBadge = document.getElementById('badge-priority');
+            priorityBadge.textContent = priorityText;
+            priorityBadge.className = `rec-badge ${priorityClass}`;
+
+            document.getElementById('lbl-impact-score').textContent = `${(socialIndex / 10).toFixed(1)} / 10`;
+            document.getElementById('lbl-students-benefited').textContent = `${studentsBenefited} Students`;
+            document.getElementById('lbl-satisfaction').textContent = `${satisfaction}%`;
+
+            document.getElementById('lbl-acc-inc').textContent = `+${rawAccessIncrease}%`;
+            document.getElementById('lbl-travel-time').textContent = `-${minutesSaved} min (-${reductionPercent}%)`;
+            document.getElementById('lbl-est-cost').textContent = `₹${projectedCost} Cr`;
+            document.getElementById('lbl-completion-time').textContent = `${buildTime} Months`;
+
+            const infraPill = document.getElementById('lbl-infra-quality');
+            infraPill.textContent = infraQuality;
+            infraPill.className = `metric-val-pill ${infraColorClass}`;
+
+            const riskPill = document.getElementById('lbl-risk');
+            riskPill.textContent = risk;
+            riskPill.className = `metric-val-pill ${riskColorClass}`;
+
+            const socialPill = document.getElementById('lbl-social-impact');
+            socialPill.textContent = socialDesc;
+            socialPill.className = `metric-val-pill ${socialColorClass}`;
+
+            const trafficPill = document.getElementById('lbl-traffic');
+            trafficPill.textContent = traffic;
+            trafficPill.className = `metric-val-pill ${trafficColorClass}`;
+
+            // Render Chart 1: Commute Times
+            const beforeBar = document.getElementById('chart-bar-before');
+            const afterBar = document.getElementById('chart-bar-after');
+            const beforeLbl = document.getElementById('chart-bar-before-lbl');
+            const afterLbl = document.getElementById('chart-bar-after-lbl');
+            const travelChartDiff = document.getElementById('lbl-travel-chart-diff');
+
+            const beforeHeight = Math.min(100, Math.round(baseTravelTime * 1.5));
+            const afterHeight = Math.min(100, Math.round(finalTravelTime * 1.5));
+
+            beforeBar.setAttribute('height', beforeHeight);
+            beforeBar.setAttribute('y', 120 - beforeHeight);
+            beforeLbl.setAttribute('y', 115 - beforeHeight);
+            beforeLbl.textContent = `${baseTravelTime} min`;
+
+            afterBar.setAttribute('height', afterHeight);
+            afterBar.setAttribute('y', 120 - afterHeight);
+            afterLbl.setAttribute('y', 115 - afterHeight);
+            afterLbl.textContent = `${finalTravelTime} min`;
+
+            travelChartDiff.textContent = `-${reductionPercent}%`;
+
+            // Render Chart 2: Spider radar graph
+            let valAccess = rawAccessIncrease + 10;
+            let valQuality = socialIndex;
+            let valEcon = Math.min(100, Math.round(budgetAdequacy));
+            let valEco = Math.min(100, Math.max(10, 100 - (capacity / 2500) * 45));
+            let valEfficiency = Math.min(100, Math.max(10, (teachers / (capacity / 20)) * 100)); // teacher allocation fitness
+
+            valAccess = Math.min(100, Math.max(10, valAccess));
+            valQuality = Math.min(100, Math.max(10, valQuality));
+            valEcon = Math.min(100, Math.max(10, valEcon));
+            valEco = Math.min(100, Math.max(10, valEco));
+            valEfficiency = Math.min(100, Math.max(10, valEfficiency));
+
+            let r0 = (valAccess / 100) * 75;
+            let r1 = (valQuality / 100) * 75;
+            let r2 = (valEcon / 100) * 75;
+            let r3 = (valEco / 100) * 75;
+            let r4 = (valEfficiency / 100) * 75;
+
+            let p0 = `100,${90 - r0}`;
+            let p1 = `${100 + r1 * 0.95},${90 - r1 * 0.31}`;
+            let p2 = `${100 + r2 * 0.59},${90 + r2 * 0.81}`;
+            let p3 = `${100 - r3 * 0.59},${90 + r3 * 0.81}`;
+            let p4 = `${100 - r4 * 0.95},${90 - r4 * 0.31}`;
+
+            document.getElementById('radar-poly').setAttribute('points', `${p0} ${p1} ${p2} ${p3} ${p4}`);
+
+            // reasoning text
+            const reasoning = `Establishing this <strong>${capacity}-student ${level}</strong> as a <strong>${type} school</strong> in the <strong>${constituency}</strong> zone (at <strong>${location}</strong>) will improve overall literacy access by <strong>+${rawAccessIncrease}%</strong> and reduce travel commutes by <strong>${minutesSaved} minutes</strong> for local students. With <strong>${teachers} educators</strong> planned, the pupil-teacher ratio is highly optimized for educational delivery. This project is <strong>${recommendText.toLowerCase()}</strong> and ranks as a <strong>${priorityText.replace('⚡ ', '').replace('⚠️ ', '').replace('🗓️ ', '')}</strong> capital infrastructure initiative.`;
+
+            document.getElementById('lbl-reasoning-text').innerHTML = reasoning;
+
+            // Display Results
+            document.getElementById('panel-results').style.display = 'flex';
+        }
+    </script>
+</body>
+
+</html>

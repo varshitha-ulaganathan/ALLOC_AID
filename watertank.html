@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Water Tank Impact Simulator</title>
+    <!-- Modern Premium Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f3f4;
+            --panel-bg: rgba(13, 20, 35, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.06);
+            --text-main: #3e419c;
+            --text-muted: #9ca3af;
+
+            /* Neon Accents */
+            --neon-purple: #a855f7;
+            --neon-purple-glow: rgba(168, 85, 247, 0.35);
+            --neon-cyan: #06b6d4;
+            --neon-cyan-glow: rgba(6, 182, 212, 0.35);
+            --neon-emerald: #10b981;
+            --neon-emerald-glow: rgba(16, 185, 129, 0.35);
+            --neon-amber: #f59e0b;
+            --neon-amber-glow: rgba(245, 158, 11, 0.35);
+            --neon-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+        }
+
+        /* Top Header Nav */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+            background: rgba(8, 12, 20, 0.6);
+            border-bottom: 1px solid var(--panel-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-symbol {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav-back:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Layout Grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+        }
+
+        .glass-panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            border-left: 3px solid var(--neon-purple);
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-input option,
+        .form-input optgroup {
+            color: #111827;
+            background-color: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Sliders */
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .slider-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .form-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px var(--neon-cyan);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--neon-cyan);
+        }
+
+        /* Segmented Radio Controls */
+        .segmented-control {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .segment-btn {
+            position: relative;
+        }
+
+        .segment-btn input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .segment-label {
+            display: block;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.3s;
+        }
+
+        .segment-btn input:checked+.segment-label {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #ffffff;
+            text-shadow: 0 0 5px var(--neon-purple-glow);
+        }
+
+        /* Glow Button */
+        .btn-run {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.5);
+            background: linear-gradient(135deg, #b975ff, #22d3ee);
+        }
+
+        .btn-run:active {
+            transform: translateY(0);
+        }
+
+        /* Right Panel States */
+        .right-panel-wrapper {
+            position: relative;
+            min-height: 500px;
+        }
+
+        /* State 1: Idle Placeholder */
+        .idle-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            height: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            background: rgba(13, 20, 35, 0.3);
+        }
+
+        .idle-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .idle-placeholder h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .idle-placeholder p {
+            color: var(--text-muted);
+            max-width: 400px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* State 2: Simulated Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: rgba(8, 12, 20, 0.92);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-shadow: inset 0 0 40px rgba(124, 58, 237, 0.1);
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 2rem;
+        }
+
+        .spinner-outer {
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: var(--neon-purple);
+            border-bottom-color: var(--neon-cyan);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-inner {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 70px;
+            height: 70px;
+            border: 3px solid transparent;
+            border-left-color: var(--neon-emerald);
+            border-right-color: var(--neon-amber);
+            border-radius: 50%;
+            animation: spin-reverse 2s linear infinite;
+        }
+
+        .spinner-core {
+            position: absolute;
+            top: 35px;
+            left: 35px;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ffffff;
+            animation: pulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            to {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .loading-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .loading-logs {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--neon-cyan);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            max-width: 480px;
+            height: 120px;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-shadow: 0 0 4px rgba(6, 182, 212, 0.3);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(5px);
+            animation: slide-up-log 0.2s forwards;
+        }
+
+        @keyframes slide-up-log {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* State 3: Dashboard Results */
+        .dashboard-results {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fade-in 0.5s ease-out forwards;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Overall AI Score and Recommendation Hero Card */
+        .hero-result-card {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .hero-result-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Radial progress gauge */
+        .score-circle-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-bg-circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.06);
+            stroke-width: 8;
+        }
+
+        .score-progress-circle {
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-text-val {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .score-text-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        .hero-details {
+            flex-grow: 1;
+        }
+
+        .rec-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--neon-emerald);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .rec-badge.high {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--neon-emerald);
+        }
+
+        .rec-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--neon-amber);
+        }
+
+        .rec-badge.low {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--neon-red);
+        }
+
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* 3-Column Quick Stats */
+        .stats-grid-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card-micro {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-card-micro .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-card-micro .value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-card-micro .subtext {
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            font-weight: 500;
+        }
+
+        /* 2-Column Main Dashboard Grid */
+        .dash-grid-main {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 800px) {
+            .dash-grid-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dynamic Metrics List */
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .metric-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-row-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .metric-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .metric-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .metric-val-pill {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-val-pill.emerald {
+            color: var(--neon-emerald);
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .metric-val-pill.cyan {
+            color: var(--neon-cyan);
+            background: rgba(6, 182, 212, 0.06);
+            border-color: rgba(6, 182, 212, 0.15);
+        }
+
+        .metric-val-pill.amber {
+            color: var(--neon-amber);
+            background: rgba(245, 158, 11, 0.06);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .metric-val-pill.red {
+            color: var(--neon-red);
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+
+        /* SVG Chart Blocks */
+        .chart-box-panel {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-desc-micro {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -4px;
+        }
+
+        .svg-chart-container {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Radar Chart Specific styles */
+        .radar-grid-line {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1;
+        }
+
+        .radar-axis {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 1;
+            stroke-dasharray: 2, 2;
+        }
+
+        .radar-polygon-filled {
+            fill: rgba(168, 85, 247, 0.25);
+            stroke: var(--neon-purple);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px var(--neon-purple-glow));
+            transition: all 1s ease-in-out;
+        }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-size: 8px;
+            font-weight: 600;
+            text-anchor: middle;
+        }
+
+        /* Bar Chart Specific styles */
+        .bar-bg {
+            fill: rgba(255, 255, 255, 0.03);
+            rx: 6;
+        }
+
+        .bar-active-1 {
+            fill: url(#cyanGradient);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .bar-active-2 {
+            fill: url(#emeraldGradient);
+            rx: 6;
+            transition: height 1.2s ease-in-out, y 1.2s ease-in-out;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.cyan {
+            background: var(--neon-cyan);
+        }
+
+        .legend-dot.emerald {
+            background: var(--neon-emerald);
+        }
+
+        /* AI Recommendation & Reasoning Card */
+        .reasoning-panel {
+            background: rgba(124, 58, 237, 0.03);
+            border: 1px dashed rgba(168, 85, 247, 0.25);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reasoning-title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .reasoning-text {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .reasoning-text strong {
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header Nav -->
+    <header>
+        <a href="homepage1.html" class="logo">
+            <div class="logo-symbol">🚰</div>
+            <span>AI Project Impact Simulator</span>
+        </a>
+        <a href="homepage1.html" class="nav-back">
+            <span>←</span> Back to Dashboard
+        </a>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar inputs form -->
+        <div class="glass-panel">
+            <div class="glass-panel-title">
+                <span>Infrastructure Plan</span>
+                <span style="font-size: 0.8rem; color: var(--neon-cyan); text-transform: uppercase;">Water
+                    Utility</span>
+            </div>
+
+            <!-- Constituency Selection -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="district-select">District</label>
+                    <select id="district-select" class="form-input" onchange="updateConstituencies()">
+                        <option value="Madurai">Madurai</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Coimbatore">Coimbatore</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="constituency-select">Constituency</label>
+                    <select id="constituency-select" class="form-input" onchange="updateDynamicDefaults()"></select>
+                </div>
+            </div>
+
+            <!-- Project Details -->
+            <div class="form-group">
+                <label class="form-label" for="proj-name">Project Identifier</label>
+                <input type="text" id="proj-name" class="form-input" value="Constituency Clean Water Mission">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="location-name">Exact Area / ward</label>
+                <input type="text" id="location-name" class="form-input" value="Main Habitation Hub">
+            </div>
+
+            <!-- Water Tank Infrastructure Type -->
+            <div class="form-group">
+                <label class="form-label">Water System Category</label>
+                <div class="segmented-control">
+                    <div class="segment-btn">
+                        <input type="radio" id="type-oht" name="tank-type" value="Overhead Water Tank" checked
+                            onclick="handleTypeChange()">
+                        <label for="type-oht" class="segment-label">OHT Tank</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-glr" name="tank-type" value="Ground Level Reservoir"
+                            onclick="handleTypeChange()">
+                        <label for="type-glr" class="segment-label">GLR Tank</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="type-integrated" name="tank-type" value="Integrated Supply System"
+                            onclick="handleTypeChange()">
+                        <label for="type-integrated" class="segment-label">Integrated</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tank Capacity Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label" for="capacity-slider">Tank Storage Capacity</label>
+                    <span id="capacity-val" class="slider-value">300 KL</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="capacity-slider" class="form-slider" min="50" max="1000" step="25"
+                        value="300" oninput="handleCapacitySlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Distribution Pipeline Network Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label" for="pipe-slider">Pipeline Network Length</label>
+                    <span id="pipe-val" class="slider-value">8 km</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="pipe-slider" class="form-slider" min="1" max="40" step="1" value="8"
+                        oninput="handlePipeSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Population Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label" for="pop-slider">Target Population Served</label>
+                    <span id="pop-val" class="slider-value">35k citizens</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="pop-slider" class="form-slider" min="5000" max="250000" step="5000"
+                        value="35000" oninput="handlePopSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Water Connection Link / Quality Index -->
+            <div class="form-group">
+                <label class="form-label">Water Source Type</label>
+                <div class="segmented-control">
+                    <div class="segment-btn">
+                        <input type="radio" id="source-borewell" name="source-index" value="Borewell" checked>
+                        <label for="source-borewell" class="segment-label">Borewell</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="source-canal" name="source-index" value="River Connection">
+                        <label for="source-canal" class="segment-label">River/Canal</label>
+                    </div>
+                    <div class="segment-btn">
+                        <input type="radio" id="source-wtp" name="source-index" value="WTP Connection">
+                        <label for="source-wtp" class="segment-label">WTP Pipeline</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Budget Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label" for="budget-slider">Budget Allocation</label>
+                    <span id="budget-val" class="slider-value">₹2.5 Crore</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="budget-slider" class="form-slider" min="0.2" max="10.0" step="0.1"
+                        value="2.5" oninput="handleBudgetSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Implementation Time Slider -->
+            <div class="form-group">
+                <div class="slider-header">
+                    <label class="form-label" for="time-slider">Completion Timeline</label>
+                    <span id="time-val" class="slider-value">6 Months</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="time-slider" class="form-slider" min="3" max="18" step="1" value="6"
+                        oninput="handleTimeSlider(this.value)">
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button class="btn-run" onclick="runAISimulation()">
+                <span>⚡</span> Run Water Grid Simulation
+            </button>
+        </div>
+
+        <!-- Telemetry Results Wrapper -->
+        <div class="right-panel-wrapper">
+
+            <!-- State 1: Idle Dashboard -->
+            <div id="panel-idle" class="idle-placeholder">
+                <div class="idle-icon">🚰</div>
+                <h2>Clean Water Network Simulator</h2>
+                <p>Input constituency demographic parameters and pipe layouts, then initiate the AI simulator to
+                    evaluate clean water coverage indexes, daily discharge rates, and walk-distance reduction scores.
+                </p>
+            </div>
+
+            <!-- State 2: Simulation Loading Console -->
+            <div id="panel-loading" class="loading-overlay">
+                <div class="spinner-container">
+                    <div class="spinner-outer"></div>
+                    <div class="spinner-inner"></div>
+                    <div class="spinner-core"></div>
+                </div>
+                <div class="loading-title">Analyzing Aquifers & Pipe Telemetry...</div>
+                <div id="log-console" class="loading-logs"></div>
+            </div>
+
+            <!-- State 3: Main Dashboard Results -->
+            <div id="panel-results" class="dashboard-results">
+
+                <!-- Summary Header Card -->
+                <div class="hero-result-card">
+                    <div class="score-circle-wrapper">
+                        <svg class="score-svg" viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="var(--neon-purple)" />
+                                    <stop offset="100%" stop-color="var(--neon-cyan)" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="score-bg-circle" cx="60" cy="60" r="50"></circle>
+                            <circle id="score-ring" class="score-progress-circle" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="score-text-val">
+                            <span id="lbl-overall-val">--</span>
+                            <span class="score-text-lbl">Score</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-details">
+                        <div id="badge-priority" class="rec-badge">--</div>
+                        <h2 id="lbl-proj-header" class="hero-title">--</h2>
+                        <p class="hero-subtitle">Water utility simulation for constituency zone: <strong
+                                id="lbl-const-header" style="color: #ffffff;">--</strong></p>
+                    </div>
+                </div>
+
+                <!-- 3-Column Indicator Row -->
+                <div class="stats-grid-row">
+                    <div class="stat-card-micro">
+                        <span class="label">Constituency Index</span>
+                        <span id="lbl-impact-score" class="value">--</span>
+                        <span class="subtext">Development Priority fit</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">Target Access Met</span>
+                        <span id="lbl-pop-benefited" class="value">--</span>
+                        <span class="subtext">Active safe water supply</span>
+                    </div>
+                    <div class="stat-card-micro">
+                        <span class="label">Public Approval</span>
+                        <span id="lbl-satisfaction" class="value">--</span>
+                        <span class="subtext">Constituent support quotient</span>
+                    </div>
+                </div>
+
+                <!-- Dashboard core details -->
+                <div class="dash-grid-main">
+                    <!-- Left: Metrics table list -->
+                    <div class="metrics-panel">
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">🚰</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Access Coverage Increase</span>
+                                    <span class="metric-desc">Proportion of citizens gaining direct supply</span>
+                                </div>
+                            </div>
+                            <span id="lbl-acc-inc" class="metric-val-pill cyan">--</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">🌊</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Daily Supply Output</span>
+                                    <span class="metric-desc">Volumetric flow rate capacity provided</span>
+                                </div>
+                            </div>
+                            <span id="lbl-daily-output" class="metric-val-pill cyan">--</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">🚶</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Walk Time Saved</span>
+                                    <span class="metric-desc">Reduction in fetching water delay</span>
+                                </div>
+                            </div>
+                            <span id="lbl-walk-reduction" class="metric-val-pill cyan">--</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">🏠</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Household Grid Reach</span>
+                                    <span class="metric-desc">Connection rates at housing clusters</span>
+                                </div>
+                            </div>
+                            <span id="lbl-household-reach" class="metric-val-pill cyan">--</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">💰</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Est. Capital Project Cost</span>
+                                    <span class="metric-desc">Project completion projection</span>
+                                </div>
+                            </div>
+                            <span id="lbl-est-cost" class="metric-val-pill">--</span>
+                        </div>
+
+                        <div class="metric-row-item">
+                            <div class="metric-meta">
+                                <div class="metric-icon">⏳</div>
+                                <div class="metric-title-group">
+                                    <span class="metric-label">Grid Laying Duration</span>
+                                    <span class="metric-desc">Infrastructure setup schedule</span>
+                                </div>
+                            </div>
+                            <span id="lbl-completion-time" class="metric-val-pill">--</span>
+                        </div>
+
+                        <!-- Environmental & Risk Badges -->
+                        <div class="form-row" style="margin-top: 0.5rem; gap: 0.75rem;">
+                            <div class="form-group" style="gap: 4px;">
+                                <span class="form-label" style="font-size: 0.65rem;">Eco Sustainability</span>
+                                <span id="lbl-env-impact" class="metric-val-pill emerald"
+                                    style="text-align: center;">--</span>
+                            </div>
+                            <div class="form-group" style="gap: 4px;">
+                                <span class="form-label" style="font-size: 0.65rem;">Grid Operational Risk</span>
+                                <span id="lbl-risk" class="metric-val-pill emerald"
+                                    style="text-align: center;">--</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="gap: 0.75rem;">
+                            <div class="form-group" style="gap: 4px;">
+                                <span class="form-label" style="font-size: 0.65rem;">Health GDP contribution</span>
+                                <span id="lbl-economic" class="metric-val-pill cyan"
+                                    style="text-align: center;">--</span>
+                            </div>
+                            <div class="form-group" style="gap: 4px;">
+                                <span class="form-label" style="font-size: 0.65rem;">Excavation Disruption</span>
+                                <span id="lbl-traffic" class="metric-val-pill" style="text-align: center;">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Charts layout -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Chart 1: Walk Distance comparison (Before/After) -->
+                        <div class="chart-box-panel">
+                            <div class="chart-title">
+                                <span>Walk Distance Reduced</span>
+                                <span id="lbl-walk-chart-diff"
+                                    style="color: var(--neon-emerald); font-weight: 700;">--</span>
+                            </div>
+                            <span class="chart-desc-micro">Average daily fetching travel time (mins)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 140">
+                                    <defs>
+                                        <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#06b6d4" />
+                                            <stop offset="100%" stop-color="rgba(6, 182, 212, 0.2)" />
+                                        </linearGradient>
+                                        <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#10b981" />
+                                            <stop offset="100%" stop-color="rgba(16, 185, 129, 0.2)" />
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Axes / Grids -->
+                                    <line x1="30" y1="120" x2="180" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+                                    <line x1="30" y1="20" x2="30" y2="120" stroke="rgba(255,255,255,0.15)"></line>
+
+                                    <line x1="30" y1="70" x2="180" y2="70" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+                                    <line x1="30" y1="35" x2="180" y2="35" stroke="rgba(255,255,255,0.04)"
+                                        stroke-dasharray="2,2"></line>
+
+                                    <!-- Values on Y axis -->
+                                    <text x="22" y="123" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">0m</text>
+                                    <text x="22" y="73" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">25m</text>
+                                    <text x="22" y="38" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="end">50m</text>
+
+                                    <!-- Bar 1: Before -->
+                                    <rect class="bar-bg" x="60" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-before" class="bar-active-1" x="60" y="40" width="30"
+                                        height="80"></rect>
+                                    <text x="75" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">Before</text>
+                                    <text id="chart-bar-before-lbl" x="75" y="35" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">--</text>
+
+                                    <!-- Bar 2: After -->
+                                    <rect class="bar-bg" x="120" y="20" width="30" height="100"></rect>
+                                    <rect id="chart-bar-after" class="bar-active-2" x="120" y="68" width="30"
+                                        height="52"></rect>
+                                    <text x="135" y="132" fill="var(--text-muted)" font-size="7"
+                                        text-anchor="middle">After (AI)</text>
+                                    <text id="chart-bar-after-lbl" x="135" y="63" fill="#ffffff" font-size="8"
+                                        font-weight="700" text-anchor="middle">--</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Spider radar graph -->
+                        <div class="chart-box-panel">
+                            <div class="chart-title">
+                                <span>Optimization Attributes</span>
+                            </div>
+                            <span class="chart-desc-micro">Constituency fit factor indices (0-100)</span>
+                            <div class="svg-chart-container">
+                                <svg width="100%" height="100%" viewBox="0 0 200 180" id="radar-chart-svg">
+                                    <!-- Radar Background Circles -->
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="20"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="40"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="60"></circle>
+                                    <circle class="radar-grid-line" cx="100" cy="90" r="75"></circle>
+
+                                    <!-- Radar Axis Lines -->
+                                    <!-- 0 deg: Coverage -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="100" y2="15"></line>
+                                    <!-- 72 deg: Delivery Speed -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="171.3" y2="66.8"></line>
+                                    <!-- 144 deg: Econ Fit -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="144" y2="150.7"></line>
+                                    <!-- 216 deg: Eco Sustainable -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="56" y2="150.7"></line>
+                                    <!-- 288 deg: Supply Reliability -->
+                                    <line class="radar-axis" x1="100" y1="90" x2="28.7" y2="66.8"></line>
+
+                                    <!-- Labels -->
+                                    <text x="100" y="10" class="radar-label">Coverage Reach</text>
+                                    <text x="176" y="65" class="radar-label" style="text-anchor: start;">Setup
+                                        Speed</text>
+                                    <text x="148" y="160" class="radar-label" style="text-anchor: start;">Econ
+                                        Fit</text>
+                                    <text x="52" y="160" class="radar-label"
+                                        style="text-anchor: end;">Eco-Friendly</text>
+                                    <text x="24" y="65" class="radar-label" style="text-anchor: end;">Reliability</text>
+
+                                    <!-- Radar Polygon filled dynamically -->
+                                    <polygon id="radar-poly" class="radar-polygon-filled"
+                                        points="100,90 100,90 100,90 100,90 100,90"></polygon>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI reasoning panel -->
+                <div class="reasoning-panel">
+                    <div class="reasoning-title-bar">
+                        <span>✨</span>
+                        <span>AI Simulation Summary & Reasoning</span>
+                    </div>
+                    <p id="lbl-reasoning-text" class="reasoning-text">
+                        Loading recommendation...
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripting for live interactions & calculations -->
+    <script>
+        // Preset demographics database for realistic calculations
+        const constituencyDatabase = {
+            "Madurai": ["Madurai North", "Madurai South", "Madurai Central", "Melur", "Thirumangalam"],
+            "Chennai": ["Velachery", "Mylapore", "Royapuram", "Anna Nagar", "T. Nagar"],
+            "Coimbatore": ["Coimbatore North", "Coimbatore South", "Singanallur", "Kavundampalayam"]
+        };
+
+        // Static configuration database that scales results realistically
+        const constituencyStats = {
+            "Madurai North": { population: 280000, baseAccessibility: 0.35, density: "High", travelBefore: 45 },
+            "Madurai South": { population: 310000, baseAccessibility: 0.42, density: "Very High", travelBefore: 38 },
+            "Madurai Central": { population: 220000, baseAccessibility: 0.55, density: "Extreme", travelBefore: 30 },
+            "Melur": { population: 150000, baseAccessibility: 0.20, density: "Low", travelBefore: 65 },
+            "Thirumangalam": { population: 180000, baseAccessibility: 0.25, density: "Moderate", travelBefore: 55 },
+
+            "Velachery": { population: 350000, baseAccessibility: 0.62, density: "Very High", travelBefore: 28 },
+            "Mylapore": { population: 290000, baseAccessibility: 0.70, density: "Extreme", travelBefore: 22 },
+            "Royapuram": { population: 420000, baseAccessibility: 0.45, density: "Extreme", travelBefore: 35 },
+            "Anna Nagar": { population: 310000, baseAccessibility: 0.68, density: "High", travelBefore: 25 },
+            "T. Nagar": { population: 260000, baseAccessibility: 0.65, density: "Extreme", travelBefore: 24 },
+
+            "Coimbatore North": { population: 320000, baseAccessibility: 0.52, density: "High", travelBefore: 32 },
+            "Coimbatore South": { population: 380000, baseAccessibility: 0.58, density: "Extreme", travelBefore: 28 },
+            "Singanallur": { population: 240000, baseAccessibility: 0.48, density: "High", travelBefore: 34 },
+            "Kavundampalayam": { population: 410000, baseAccessibility: 0.40, density: "High", travelBefore: 40 }
+        };
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            // Get URL parameters if preset
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialConstituency = urlParams.get('constituency');
+
+            // Find matching district if constituency was passed in
+            let initialDistrict = "Madurai";
+            if (initialConstituency) {
+                for (const dist in constituencyDatabase) {
+                    if (constituencyDatabase[dist].includes(initialConstituency)) {
+                        initialDistrict = dist;
+                        break;
+                    }
+                }
+            }
+
+            // Populate District Dropdown
+            const distSelect = document.getElementById('district-select');
+            distSelect.value = initialDistrict;
+
+            // Load constituencies
+            updateConstituencies();
+
+            if (initialConstituency) {
+                document.getElementById('constituency-select').value = initialConstituency;
+            }
+
+            // Handle prefill values
+            updateDynamicDefaults();
+        });
+
+        function updateConstituencies() {
+            const dist = document.getElementById('district-select').value;
+            const constSelect = document.getElementById('constituency-select');
+            constSelect.innerHTML = "";
+
+            constituencyDatabase[dist].forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                constSelect.appendChild(opt);
+            });
+
+            // Set up stats according to selected constituency
+            updateDynamicDefaults();
+        }
+
+        // Automatic update of slider label/badge displays
+        function handleBudgetSlider(val) {
+            document.getElementById('budget-val').textContent = `₹${val} Crore`;
+            updateDynamicDefaults(false);
+        }
+
+        function handleCapacitySlider(val) {
+            document.getElementById('capacity-val').textContent = `${val} KL`;
+
+            // Capacity dynamically influences the pipeline recommendations
+            const type = document.querySelector('input[name="tank-type"]:checked').value;
+            let ratio = 0.03;
+            if (type === "Ground Level Reservoir") ratio = 0.02;
+            if (type === "Integrated Supply System") ratio = 0.025;
+
+            const pipeNeeded = Math.max(1, Math.round(val * ratio));
+            document.getElementById('pipe-slider').value = pipeNeeded;
+            document.getElementById('pipe-val').textContent = `${pipeNeeded} km`;
+
+            updateDynamicDefaults(false);
+        }
+
+        function handlePipeSlider(val) {
+            document.getElementById('pipe-val').textContent = `${val} km`;
+        }
+
+        // Handle population slider display formatting
+        function handlePopSlider(val) {
+            let label = "";
+            if (val >= 100000) {
+                label = `${(val / 100000).toFixed(1)} Lakhs`;
+            } else {
+                label = `${(val / 1000).toFixed(0)}k citizens`;
+            }
+            document.getElementById('pop-val').textContent = label;
+        }
+
+        // Handle timeline slider format
+        function handleTimeSlider(val) {
+            document.getElementById('time-val').textContent = `${val} Months`;
+        }
+
+        // When Type changes, recalculate appropriate presets
+        function handleTypeChange() {
+            const type = document.querySelector('input[name="tank-type"]:checked').value;
+            let defaultCapacity = 300;
+            let defaultBudget = 2.5;
+            let defaultTime = 6;
+
+            if (type === "Overhead Water Tank") {
+                defaultCapacity = 300;
+                defaultBudget = 2.5;
+                defaultTime = 6;
+            } else if (type === "Ground Level Reservoir") {
+                defaultCapacity = 600;
+                defaultBudget = 4.8;
+                defaultTime = 9;
+            } else if (type === "Integrated Supply System") {
+                defaultCapacity = 1000;
+                defaultBudget = 9.5;
+                defaultTime = 14;
+            }
+
+            document.getElementById('capacity-slider').value = defaultCapacity;
+            document.getElementById('capacity-val').textContent = `${defaultCapacity} KL`;
+
+            document.getElementById('budget-slider').value = defaultBudget;
+            document.getElementById('budget-val').textContent = `₹${defaultBudget} Crore`;
+
+            document.getElementById('time-slider').value = defaultTime;
+            document.getElementById('time-val').textContent = `${defaultTime} Months`;
+
+            // Recompute pipeline
+            let ratio = 0.03;
+            if (type === "Ground Level Reservoir") ratio = 0.02;
+            if (type === "Integrated Supply System") ratio = 0.025;
+            const pipeNeeded = Math.max(1, Math.round(defaultCapacity * ratio));
+
+            document.getElementById('pipe-slider').value = pipeNeeded;
+            document.getElementById('pipe-val').textContent = `${pipeNeeded} km`;
+        }
+
+        // When constituency drops down, fetch base demographics
+        function updateDynamicDefaults(overrideSliders = true) {
+            const consName = document.getElementById('constituency-select').value;
+            if (!consName) return;
+
+            const stats = constituencyStats[consName];
+            if (stats && overrideSliders) {
+                // Set default target population served (water tank typically serves a sector, cap default)
+                const waterPopServedDefault = Math.min(stats.population, 50000);
+                document.getElementById('pop-slider').value = waterPopServedDefault;
+                handlePopSlider(waterPopServedDefault);
+
+                // Auto-select source type standard based on accessibility (poor access -> needs WTP or river)
+                if (stats.baseAccessibility <= 0.3) {
+                    document.getElementById('source-wtp').checked = true;
+                } else if (stats.baseAccessibility <= 0.6) {
+                    document.getElementById('source-canal').checked = true;
+                } else {
+                    document.getElementById('source-borewell').checked = true;
+                }
+            }
+        }
+
+        // Simulated AI Logs
+        const loadingSteps = [
+            "Analyzing water table depth & recharge indices...",
+            "Retrieving local household pipeline access coefficients...",
+            "Simulating distribution line pressure & gradient losses...",
+            "Evaluating source water purification criteria & TDS levels...",
+            "Calculating constituent safe drinking water sufficiency index...",
+            "Running aquifer sustainability risk scoring engine...",
+            "Synthesizing environmental footprint & pipe laying logistics...",
+            "Compiling results dashboard..."
+        ];
+
+        function runAISimulation() {
+            // Show loading panel
+            document.getElementById('panel-idle').style.display = 'none';
+            document.getElementById('panel-results').style.display = 'none';
+
+            const loadingPanel = document.getElementById('panel-loading');
+            loadingPanel.style.display = 'flex';
+
+            const consoleBox = document.getElementById('log-console');
+            consoleBox.innerHTML = "";
+
+            let delay = 0;
+            loadingSteps.forEach((step, idx) => {
+                setTimeout(() => {
+                    const log = document.createElement('div');
+                    log.className = 'log-entry';
+                    log.innerHTML = `<span style="color: var(--neon-cyan); font-weight: bold;">[${((idx * 0.3) + 0.1).toFixed(1)}s]</span> <span>${step}</span>`;
+                    consoleBox.appendChild(log);
+                    consoleBox.scrollTop = consoleBox.scrollHeight;
+                }, delay);
+                delay += 300 + Math.random() * 200;
+            });
+
+            // After logs finish, execute math & load dashboard
+            setTimeout(() => {
+                loadingPanel.style.display = 'none';
+                calculateAndRenderSimulationResults();
+            }, delay + 400);
+        }
+
+        // SIMULATION LOGIC: Computes realistic output variables based on inputs
+        function calculateAndRenderSimulationResults() {
+            // Read Inputs
+            const projName = document.getElementById('proj-name').value;
+            const constituency = document.getElementById('constituency-select').value;
+            const location = document.getElementById('location-name').value;
+            const capacity = parseInt(document.getElementById('capacity-slider').value);
+            const pipeline = parseInt(document.getElementById('pipe-slider').value);
+            const population = parseInt(document.getElementById('pop-slider').value);
+            const budget = parseFloat(document.getElementById('budget-slider').value);
+            const buildTime = parseInt(document.getElementById('time-slider').value);
+
+            const type = document.querySelector('input[name="tank-type"]:checked').value;
+            const sourceIndex = document.querySelector('input[name="source-index"]:checked').value;
+
+            // Fetch base stats from constituency profile
+            const profile = constituencyStats[constituency] || { population: population, baseAccessibility: 0.4, density: "High", travelBefore: 45 };
+
+            // 1. Grid Coverage Reach Calculation
+            // Household average size is 5 people. Coverage is determined by pipe laying and density
+            let households = population / 5;
+            let coverageRatio = (pipeline * 1000) / households;
+            let coverage = Math.round(coverageRatio * 45);
+            if (type === "Integrated Supply System") coverage += 15;
+            coverage = Math.min(99, Math.max(12, coverage));
+
+            // 2. Clean Water Access Index Increase (%)
+            let sourceMultiplier = 1.0;
+            if (sourceIndex === "Borewell") sourceMultiplier = 0.8;
+            if (sourceIndex === "River Connection") sourceMultiplier = 1.1;
+            if (sourceIndex === "WTP Connection") sourceMultiplier = 1.4;
+
+            let accessIncrease = Math.round(coverage * 0.8 * sourceMultiplier);
+            accessIncrease = Math.min(95, Math.max(15, accessIncrease));
+
+            // 3. Daily Water Supply Output (Lakh Liters per Day)
+            let fillingCycles = 2.0;
+            if (sourceIndex === "WTP Connection") fillingCycles = 2.8;
+            if (sourceIndex === "Borewell") fillingCycles = 1.3;
+            let dailyLiters = capacity * 1000 * fillingCycles;
+            let dailyLakhLiters = dailyLiters / 100000;
+
+            // 4. Walk distance reduction time
+            let baseTravelTime = profile.travelBefore;
+            let reductionPercent = Math.min(90, Math.round(coverage * 0.9));
+            let minutesSaved = Math.round(baseTravelTime * (reductionPercent / 100));
+            let finalTravelTime = Math.max(3, baseTravelTime - minutesSaved);
+            reductionPercent = Math.round(((baseTravelTime - finalTravelTime) / baseTravelTime) * 100);
+
+            // 5. Budget adequacy check
+            // Overhead tanks cost approx ₹0.004 Cr per KL, pipes cost ₹0.11 Cr per km
+            let requiredBudget = (capacity * 0.004) + (pipeline * 0.11);
+            let budgetAdequacy = budget >= requiredBudget ? 100 : (budget / requiredBudget) * 100;
+
+            // 6. Citizen Satisfaction Index
+            let capAdequacy = ((capacity * 1000) / population) >= 30 ? 100 : (((capacity * 1000) / population) / 30) * 100;
+            let satisfaction = Math.round((capAdequacy * 0.3) + (coverage * 0.4) + (budgetAdequacy * 0.3));
+            satisfaction = Math.min(98, Math.max(45, satisfaction));
+
+            // 7. Environmental Impact Profile
+            let envImpact = "Minimal A+";
+            let envColorClass = "emerald";
+            if (sourceIndex === "Borewell") {
+                envImpact = "Moderate B";
+                envColorClass = "amber";
+                if (capacity > 600) {
+                    envImpact = "High Risk C";
+                    envColorClass = "red";
+                }
+            } else if (sourceIndex === "River Connection") {
+                envImpact = "Low A";
+                envColorClass = "emerald";
+            }
+
+            // 8. Grid Operational Risk
+            let risk = "Low Risk";
+            let riskColorClass = "emerald";
+            if (budgetAdequacy < 55 || (sourceIndex === "Borewell" && population > 60000)) {
+                risk = "High Risk";
+                riskColorClass = "red";
+            } else if (budgetAdequacy < 85 || sourceIndex === "Borewell") {
+                risk = "Medium Risk";
+                riskColorClass = "amber";
+            }
+
+            // 9. Economic GDP Health Impact
+            let healthSavings = Math.round(coverage * 0.12);
+            let econGrowth = Math.min(12, Math.round(1 + (budget * 0.6) + (coverage / 20)));
+            let econDesc = `High (+${econGrowth}%)`;
+            let econColorClass = "cyan";
+            if (econGrowth < 4) {
+                econDesc = `Moderate (+${econGrowth}%)`;
+                econColorClass = "";
+            }
+
+            // 10. Excavation/Construction Disruption
+            let traffic = "Low";
+            let trafficColorClass = "emerald";
+            if (pipeline > 15 && (profile.density === "Extreme" || profile.density === "Very High")) {
+                traffic = "High";
+                trafficColorClass = "red";
+            } else if (pipeline > 8 || profile.density === "Extreme") {
+                traffic = "Medium";
+                trafficColorClass = "amber";
+            } else {
+                trafficColorClass = "emerald";
+            }
+
+            // 11. Overall AI Score Formula
+            let riskPenalty = risk === "High Risk" ? 15 : (risk === "Medium Risk" ? 6 : 0);
+            let overallScore = Math.round((accessIncrease * 0.3) + (coverage * 0.3) + (satisfaction * 0.2) + (budgetAdequacy * 0.2) - riskPenalty);
+            overallScore = Math.min(99, Math.max(35, overallScore));
+
+            let priorityText = "⚡ High Priority";
+            let priorityClass = "high";
+            let recommendText = "Highly Recommended";
+            if (overallScore < 55) {
+                priorityText = "⚠️ Low Priority";
+                priorityClass = "low";
+                recommendText = "Alternative Evaluated";
+            } else if (overallScore < 75) {
+                priorityText = "🗓️ Medium Priority";
+                priorityClass = "medium";
+                recommendText = "Recommended";
+            }
+
+            // Formatting benefited population text
+            let popBenefitedText = "";
+            let rawBenefited = Math.round(population * (coverage / 100));
+            if (rawBenefited >= 100000) {
+                popBenefitedText = `${(rawBenefited / 100000).toFixed(2)} Lakh`;
+            } else {
+                popBenefitedText = `${(rawBenefited / 1000).toFixed(0)}k`;
+            }
+
+            // Project Cost Projection
+            let projectedCost = (budget * 1.04).toFixed(2);
+
+            // RENDER OUTPUTS TO DASHBOARD
+            document.getElementById('lbl-overall-val').textContent = overallScore;
+
+            // Radial Progress Circle Offset
+            const circle = document.getElementById('score-ring');
+            const circumference = 314;
+            const offset = circumference - (overallScore / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            // Set text labels
+            document.getElementById('lbl-proj-header').textContent = type;
+            document.getElementById('lbl-const-header').textContent = constituency;
+
+            const priorityBadge = document.getElementById('badge-priority');
+            priorityBadge.textContent = priorityText;
+            priorityBadge.className = `rec-badge ${priorityClass}`;
+
+            document.getElementById('lbl-impact-score').textContent = `${(overallScore / 10).toFixed(1)} / 10`;
+            document.getElementById('lbl-pop-benefited').textContent = `${popBenefitedText} citizens`;
+            document.getElementById('lbl-satisfaction').textContent = `${satisfaction}%`;
+
+            document.getElementById('lbl-acc-inc').textContent = `+${accessIncrease}%`;
+            document.getElementById('lbl-daily-output').textContent = `${dailyLakhLiters.toFixed(1)} Lakh L/day`;
+            document.getElementById('lbl-walk-reduction').textContent = `-${minutesSaved} min (-${reductionPercent}%)`;
+            document.getElementById('lbl-household-reach').textContent = `${coverage}%`;
+            document.getElementById('lbl-est-cost').textContent = `₹${projectedCost} Cr`;
+            document.getElementById('lbl-completion-time').textContent = `${buildTime} Months`;
+
+            // Metric pills color classes
+            const envPill = document.getElementById('lbl-env-impact');
+            envPill.textContent = envImpact;
+            envPill.className = `metric-val-pill ${envColorClass}`;
+
+            const riskPill = document.getElementById('lbl-risk');
+            riskPill.textContent = risk;
+            riskPill.className = `metric-val-pill ${riskColorClass}`;
+
+            const econPill = document.getElementById('lbl-economic');
+            econPill.textContent = econDesc;
+            econPill.className = `metric-val-pill ${econColorClass}`;
+
+            const trafficPill = document.getElementById('lbl-traffic');
+            trafficPill.textContent = traffic;
+            trafficPill.className = `metric-val-pill ${trafficColorClass}`;
+
+            // Chart 1: Bar Chart heights update
+            const beforeBar = document.getElementById('chart-bar-before');
+            const afterBar = document.getElementById('chart-bar-after');
+            const beforeLbl = document.getElementById('chart-bar-before-lbl');
+            const afterLbl = document.getElementById('chart-bar-after-lbl');
+            const travelChartDiff = document.getElementById('lbl-walk-chart-diff');
+
+            const beforeHeight = Math.min(100, Math.round(baseTravelTime * 1.5));
+            const afterHeight = Math.min(100, Math.round(finalTravelTime * 1.5));
+
+            beforeBar.setAttribute('height', beforeHeight);
+            beforeBar.setAttribute('y', 120 - beforeHeight);
+            beforeLbl.setAttribute('y', 115 - beforeHeight);
+            beforeLbl.textContent = `${baseTravelTime} min`;
+
+            afterBar.setAttribute('height', afterHeight);
+            afterBar.setAttribute('y', 120 - afterHeight);
+            afterLbl.setAttribute('y', 115 - afterHeight);
+            afterLbl.textContent = `${finalTravelTime} min`;
+
+            travelChartDiff.textContent = `-${reductionPercent}%`;
+
+            // Chart 2: Radar Chart coordinates calculation
+            let valReach = coverage;
+            let valSpeed = Math.max(25, 100 - (buildTime / 18) * 100);
+            let valEcon = econGrowth * 8;
+            let valEco = 100 - (sourceIndex === "Borewell" ? 45 : (sourceIndex === "River Connection" ? 15 : 5));
+            let valReliability = Math.round(budgetAdequacy * 0.7 + (sourceIndex === "WTP Connection" ? 30 : (sourceIndex === "River Connection" ? 20 : 10)));
+
+            valReach = Math.min(100, Math.max(10, valReach));
+            valSpeed = Math.min(100, Math.max(10, valSpeed));
+            valEcon = Math.min(100, Math.max(10, valEcon));
+            valEco = Math.min(100, Math.max(10, valEco));
+            valReliability = Math.min(100, Math.max(10, valReliability));
+
+            let r0 = (valReach / 100) * 75;
+            let r1 = (valSpeed / 100) * 75;
+            let r2 = (valEcon / 100) * 75;
+            let r3 = (valEco / 100) * 75;
+            let r4 = (valReliability / 100) * 75;
+
+            let p0 = `100,${90 - r0}`;
+            let p1 = `${100 + r1 * 0.95},${90 - r1 * 0.31}`;
+            let p2 = `${100 + r2 * 0.59},${90 + r2 * 0.81}`;
+            let p3 = `${100 - r3 * 0.59},${90 + r3 * 0.81}`;
+            let p4 = `${100 - r4 * 0.95},${90 - r4 * 0.31}`;
+
+            document.getElementById('radar-poly').setAttribute('points', `${p0} ${p1} ${p2} ${p3} ${p4}`);
+
+            // DYNAMIC AI REASONING TEXT
+            const reasoning = `Establishing this <strong>${capacity} KL ${type}</strong> in the <strong>${constituency}</strong> zone (at <strong>${location}</strong>) will significantly strengthen local clean water accessibility, driving coverage up by <strong>${accessIncrease}%</strong> for over <strong>${popBenefitedText}</strong> constituents. It saves families an average of <strong>${minutesSaved} minutes</strong> daily fetching water. Leveraging a <strong>${sourceIndex}</strong> feed and a <strong>${pipeline} km</strong> distribution network, this project carries a <strong>${risk.toLowerCase()}</strong> status. Based on spatial health and efficiency indicators, it registers as a <strong>${priorityText.replace('⚡ ', '').replace('⚠️ ', '').replace('🗓️ ', '')}</strong> constituent development index directive.`;
+
+            document.getElementById('lbl-reasoning-text').innerHTML = reasoning;
+
+            // Display Results
+            document.getElementById('panel-results').style.display = 'flex';
+        }
+    </script>
+</body>
+
+</html>
